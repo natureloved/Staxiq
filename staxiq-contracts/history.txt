@@ -1,0 +1,8 @@
+#V2
+(contract-call? .staxiq-user-profile set-risk-profile u2)
+(contract-call? .staxiq-user-profile get-user-profile tx-sender)
+(contract-call? .staxiq-user-profile save-strategy "abc123hash" "StackingDAO")
+(contract-call? .staxiq-user-profile get-strategy-count tx-sender)
+(contract-call? .staxiq-user-profile set-risk-profile u9)
+clarinet console
+tx-sender

@@ -1,0 +1,15 @@
+@import "tailwindcss";
+/* ✅ v4 uses @import not @tailwind directives */
+
+/* Custom colors for Staxiq */
+@theme {
+  --color-bitcoin: #F7931A;
+  --color-bitcoin-dark: #e8820a;
+}
+
+/* Base styles */
+body {
+  background-color: #030712;
+  color: #f9fafb;
+  -webkit-font-smoothing: antialiased;
+}

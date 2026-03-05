@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+settings/Testnet.toml
+settings/Mainnet.toml
+staxiq-contracts/settings/Testnet.toml
+staxiq-contracts/settings/Mainnet.toml
+.DS_Store
