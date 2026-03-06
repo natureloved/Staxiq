@@ -6,18 +6,22 @@ export function useWallet() {
     const [address, setAddress] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // ✅ Extracted into reusable function
     const loadAddressFromStorage = useCallback(() => {
-        const storage = getLocalStorage();
-        const isDev = window.location.hostname === 'localhost';
-        const addrs = storage?.addresses;
-        const stxAddr = isDev
-            ? addrs?.stx?.find(a => a.address.startsWith('ST'))?.address
-            : addrs?.stx?.find(a => a.address.startsWith('SP'))?.address;
-        return stxAddr || null;
+        try {
+            const storage = getLocalStorage();
+            const isDev = window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1';
+            const addrs = storage?.addresses;
+            const stxAddr = isDev
+                ? addrs?.stx?.find(a => a.address.startsWith('ST'))?.address
+                : addrs?.stx?.find(a => a.address.startsWith('SP'))?.address;
+            return stxAddr || null;
+        } catch {
+            return null;
+        }
     }, []);
 
-    // On mount — restore session
+    // Restore session on mount
     useEffect(() => {
         if (isConnected()) {
             const addr = loadAddressFromStorage();
@@ -28,26 +32,57 @@ export function useWallet() {
         }
     }, [loadAddressFromStorage]);
 
-    async function connectWallet() {
+    // ✅ Poll localStorage after connect() fires
+    // connect() in v8 does NOT return a promise — it opens the wallet popup
+    // and writes to localStorage when user approves. We poll until we see it.
+    function pollForAddress(attempts = 0) {
+        if (attempts > 20) {
+            // Gave up after 10 seconds
+            setLoading(false);
+            return;
+        }
+
+        const addr = loadAddressFromStorage();
+
+        if (addr) {
+            setAddress(addr);
+            setConnected(true);
+            setLoading(false);
+        } else {
+            // Try again in 500ms
+            setTimeout(() => pollForAddress(attempts + 1), 500);
+        }
+    }
+
+    function connectWallet() {
         try {
             setLoading(true);
-            await connect({
+
+            connect({
                 appDetails: {
                     name: 'Staxiq',
-                    icon: window.location.origin + '/staxiq-logo.png',
+                    icon: window.location.origin + '/favicon.ico',
+                },
+                onFinish: () => {
+                    // ✅ onFinish callback fires when user approves in Xverse
+                    setTimeout(() => {
+                        const addr = loadAddressFromStorage();
+                        if (addr) {
+                            setAddress(addr);
+                            setConnected(true);
+                        }
+                        setLoading(false);
+                    }, 300);
+                },
+                onCancel: () => {
+                    // User closed the popup
+                    setLoading(false);
                 },
             });
 
-            // ✅ KEY FIX: Read from localStorage AFTER connect resolves
-            // Small timeout ensures wallet extension has written to storage
-            setTimeout(() => {
-                const addr = loadAddressFromStorage();
-                if (addr) {
-                    setAddress(addr);
-                    setConnected(true);
-                }
-                setLoading(false);
-            }, 300);
+            // ✅ Fallback: also poll in case onFinish doesn't fire
+            // This handles older versions of Xverse
+            setTimeout(() => pollForAddress(), 1000);
 
         } catch (err) {
             console.error('Wallet connect error:', err);
@@ -56,7 +91,11 @@ export function useWallet() {
     }
 
     function disconnectWallet() {
-        disconnect();
+        try {
+            disconnect();
+        } catch {
+            // Ignore disconnect errors
+        }
         setConnected(false);
         setAddress(null);
     }
@@ -72,6 +111,6 @@ export function useWallet() {
         shortAddress,
         connectWallet,
         disconnectWallet,
-        loading
+        loading,
     };
 }

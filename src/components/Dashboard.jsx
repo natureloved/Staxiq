@@ -1,84 +1,89 @@
 import React from 'react';
 import ProtocolCard from './ProtocolCard';
 import AICopilot from './AICopilot';
+import PortfolioChart from './PortfolioChart';
+import { useCountUp } from '../hooks/useCountUp';
 import { usePortfolio } from '../hooks/usePortfolio';
 
 const Dashboard = ({ connected, address }) => {
     const { portfolio, loading } = usePortfolio(address);
     const { stxBalance, sbtcBalance, totalUSD, txHistory } = portfolio;
 
-    const truncate = (str, len) => str.length > len ? `${str.substring(0, len)}...` : str;
+    // CountUp animations
+    const animatedStx = useCountUp(stxBalance, 1500, 2);
+    const animatedSbtc = useCountUp(sbtcBalance, 1500, 4);
+    const animatedUsd = useCountUp(totalUSD, 1500, 2);
+    const animatedTx = useCountUp(txHistory?.length || 0, 1000, 0);
 
     if (!connected) {
-        return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col items-center justify-center min-h-[60vh]">
-                <div className="w-20 h-20 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-bitcoin/5">
-                    <svg className="w-10 h-10 text-bitcoin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-white mb-2">Welcome to Staxiq</h2>
-                <p className="text-gray-400 text-center max-w-sm">Connect your Stacks wallet to view your DeFi portfolio, discover yield, and get AI strategies.</p>
-            </div>
-        );
+        return null;
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+            {/* Portfolio Metric Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                <div className="bg-gray-900 rounded-2xl shadow-lg border border-gray-800 p-5 flex flex-col justify-center relative overflow-hidden group">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500"></div>
-                    <p className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-widest ml-2">STX Balance</p>
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(247,147,26,0.03)] hover:shadow-[0_8px_30px_rgba(247,147,26,0.15)] transition-shadow duration-300">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-orange-500 shadow-[0_0_10px_rgba(247,147,26,0.8)]"></div>
+                    <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-2 uppercase tracking-widest ml-3">STX Balance</p>
                     {loading ? (
-                        <div className="animate-pulse bg-gray-800 h-8 w-24 rounded mt-1 ml-2"></div>
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-24 rounded mt-1 ml-3"></div>
                     ) : (
-                        <p className="text-3xl font-bold text-white ml-2">{stxBalance} <span className="text-lg text-gray-500 font-medium">STX</span></p>
+                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
+                            {animatedStx}
+                            <span className="text-xl dark:text-[#4a5a7a] text-[#8899bb] font-bold ml-2 tracking-normal">STX</span>
+                        </p>
                     )}
                 </div>
 
-                <div className="bg-gray-900 rounded-2xl shadow-lg border border-gray-800 p-5 flex flex-col justify-center relative overflow-hidden group">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-bitcoin"></div>
-                    <p className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-widest ml-2">sBTC Balance</p>
-                    {loading ? (
-                        <div className="animate-pulse bg-gray-800 h-8 w-24 rounded mt-1 ml-2"></div>
-                    ) : (
-                        <p className="text-3xl font-bold text-white ml-2">{sbtcBalance} <span className="text-lg text-gray-500 font-medium">sBTC</span></p>
-                    )}
-                </div>
-
-                <div className="bg-gray-900 rounded-2xl shadow-lg border border-gray-800 p-5 flex flex-col justify-center relative overflow-hidden group">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
-                    <p className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-widest ml-2">Total Value</p>
-                    {loading ? (
-                        <div className="animate-pulse bg-gray-800 h-8 w-32 rounded mt-1 ml-2"></div>
-                    ) : (
-                        <p className="text-3xl font-bold text-white ml-2"><span className="text-green-500">$</span>{totalUSD}</p>
-                    )}
-                </div>
-
-                <div className="bg-gray-900 rounded-2xl shadow-lg border border-gray-800 p-5 flex flex-col justify-center relative overflow-hidden group">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-                    <p className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-widest ml-2">Transactions</p>
-                    {loading ? (
-                        <div className="animate-pulse bg-gray-800 h-8 w-16 rounded mt-1 ml-2"></div>
-                    ) : (
-                        <p className="text-3xl font-bold text-white ml-2">{txHistory.length}</p>
-                    )}
-                </div>
-
-            </div>
-
-            <div className="bg-gray-900 rounded-2xl shadow-lg border border-gray-800 p-6 flex items-center justify-center py-12">
-                <div className="text-center">
-                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-2xl">📈</span>
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-orange-400"></div>
+                    <div className="flex items-center gap-2 mb-2 ml-3">
+                        <svg className="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.965 24A11.964 11.964 0 0024 12V0H0v12a11.965 11.965 0 0011.965 12zm.849-5.462v-1.631c-2.31 0-3.955-1.284-4.227-3.414h1.791c.205 1.109 1.155 1.748 2.436 1.748 1.488 0 2.454-.77 2.454-1.859 0-1.121-1.026-1.589-2.736-2.185-2.035-.724-3.565-1.613-3.565-3.506 0-1.928 1.488-3.32 3.847-3.588V2.515h1.617v1.542c2.168.176 3.633 1.25 3.96 3.121h-1.78c-.281-1.018-1.229-1.533-2.18-1.533-1.4 0-2.352.69-2.352 1.739 0 1.052.79 1.484 2.502 2.08 2.305.819 3.799 1.765 3.799 3.693 0 2.068-1.503 3.518-4.008 3.84v1.541h-1.558z" />
+                        </svg>
+                        <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold uppercase tracking-widest">sBTC Balance</p>
                     </div>
-                    <h3 className="text-lg font-bold text-white">Advanced Charts Coming Soon</h3>
-                    <p className="text-sm text-gray-500 mt-2">Historical portfolio performance will appear here.</p>
+                    {loading ? (
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-24 rounded mt-1 ml-3"></div>
+                    ) : (
+                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
+                            {animatedSbtc}
+                            <span className="text-xl dark:text-[#4a5a7a] text-[#8899bb] font-bold ml-2 tracking-normal">sBTC</span>
+                        </p>
+                    )}
                 </div>
+
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]"></div>
+                    <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-2 uppercase tracking-widest ml-3">Total Value</p>
+                    {loading ? (
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-32 rounded mt-1 ml-3"></div>
+                    ) : (
+                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
+                            <span className="text-green-500 mr-1">$</span>
+                            {animatedUsd}
+                        </p>
+                    )}
+                </div>
+
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+                    <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-2 uppercase tracking-widest ml-3">Transactions</p>
+                    {loading ? (
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-16 rounded mt-1 ml-3"></div>
+                    ) : (
+                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
+                            {animatedTx}
+                        </p>
+                    )}
+                </div>
+
             </div>
+
+            {/* Portfolio Chart Section */}
+            <PortfolioChart totalUSD={totalUSD} />
 
             <ProtocolCard />
 
@@ -90,57 +95,57 @@ const Dashboard = ({ connected, address }) => {
                 totalUSD={portfolio.totalUSD}
             />
 
-            <div className="bg-gray-900 rounded-2xl shadow-lg border border-gray-800 overflow-hidden mt-8">
-                <div className="px-6 py-5 border-b border-gray-800 bg-gray-800/40">
-                    <h2 className="text-lg font-bold text-white">Recent Transactions</h2>
+            <div className="dark:bg-[#0d1117]/60 bg-white rounded-2xl shadow-xl dark:border-[#1e2d4a] border-gray-200 overflow-hidden mt-8">
+                <div className="px-8 py-6 border-b dark:border-[#1e2d4a] border-gray-200 dark:bg-[#141c2e]/40 bg-gray-50">
+                    <h2 className="text-xl font-bold dark:text-white text-gray-900 font-display">Recent Transactions</h2>
                 </div>
 
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500 text-sm font-medium animate-pulse">
+                    <div className="p-10 text-center dark:text-[#4a5a7a] text-[#8899bb] text-sm font-medium animate-pulse">
                         Loading recent transactions...
                     </div>
                 ) : txHistory.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500 text-sm font-medium">
+                    <div className="p-10 text-center dark:text-[#4a5a7a] text-[#8899bb] text-sm font-medium">
                         No recent transactions found on this account
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-800">
-                            <thead className="bg-gray-800/60">
+                        <table className="min-w-full divide-y dark:divide-gray-800 divide-gray-200">
+                            <thead className="dark:bg-[#0d1117] bg-gray-50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Type</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Date</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">TxID</th>
+                                    <th scope="col" className="px-8 py-4 text-left text-xs font-bold dark:text-[#8899bb] text-[#4a5a7a] uppercase tracking-wider font-sans">Type</th>
+                                    <th scope="col" className="px-8 py-4 text-left text-xs font-bold dark:text-[#8899bb] text-[#4a5a7a] uppercase tracking-wider font-sans">Amount</th>
+                                    <th scope="col" className="px-8 py-4 text-left text-xs font-bold dark:text-[#8899bb] text-[#4a5a7a] uppercase tracking-wider font-sans">Status</th>
+                                    <th scope="col" className="px-8 py-4 text-left text-xs font-bold dark:text-[#8899bb] text-[#4a5a7a] uppercase tracking-wider font-sans">Date</th>
+                                    <th scope="col" className="px-8 py-4 text-left text-xs font-bold dark:text-[#8899bb] text-[#4a5a7a] uppercase tracking-wider font-sans">TxID</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-gray-900 divide-y divide-gray-800">
+                            <tbody className="dark:bg-[#0a0e1a]/50 bg-white divide-y dark:divide-gray-800 divide-gray-100">
                                 {txHistory.map((tx) => (
-                                    <tr key={tx.txId} className="hover:bg-gray-800/60 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 capitalize font-semibold">
+                                    <tr key={tx.txId} className="dark:hover:bg-[#0d1117] hover:bg-gray-50 transition-colors">
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm dark:text-[#d0d8f0] text-gray-700 capitalize font-bold">
                                             {tx.type.replace('_', ' ')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-orange-400 font-mono">
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm text-orange-500 font-mono font-bold">
                                             {tx.amount}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${tx.status === 'success' ? 'bg-green-900/50 text-green-400' :
-                                                    tx.status === 'pending' ? 'bg-yellow-900/50 text-yellow-400' :
-                                                        'bg-red-900/50 text-red-400'
+                                        <td className="px-8 py-5 whitespace-nowrap">
+                                            <span className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${tx.status === 'success' ? 'dark:bg-green-900/30 bg-green-100 dark:text-green-400 text-green-700 dark:border-green-800/50 border border-green-200' :
+                                                tx.status === 'pending' ? 'dark:bg-yellow-900/30 bg-yellow-100 dark:text-yellow-400 text-yellow-700 dark:border-yellow-800/50 border border-yellow-200' :
+                                                    'dark:bg-red-900/30 bg-red-100 dark:text-red-400 text-red-700 dark:border-red-800/50 border border-red-200'
                                                 }`}>
                                                 {tx.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm dark:text-[#8899bb] text-[#4a5a7a] font-medium">
                                             {tx.date}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-8 py-5 whitespace-nowrap">
                                             <a
                                                 href={tx.explorerUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-blue-400 hover:text-blue-300 font-mono text-sm transition-colors"
+                                                className="text-blue-500 hover:text-blue-400 font-mono text-sm transition-colors font-bold"
                                             >
                                                 {tx.shortTxId} ↗
                                             </a>
@@ -152,7 +157,6 @@ const Dashboard = ({ connected, address }) => {
                     </div>
                 )}
             </div>
-
         </div>
     );
 };

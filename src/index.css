@@ -1,15 +1,172 @@
 @import "tailwindcss";
-/* ✅ v4 uses @import not @tailwind directives */
 
-/* Custom colors for Staxiq */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
+  --color-bg-deepest: #0a0e1a;
+  --color-bg-base: #0d1117;
+  --color-bg-raised: #111827;
+  --color-bg-card: #141c2e;
+  --color-bg-card-alt: #1a2540;
+
+  --color-border: #1e2d4a;
+  --color-border-alt: #2a3f6a;
+
+  --color-text-primary: #f0f4ff;
+  --color-text-secondary: #8899bb;
+  --color-text-muted: #4a5a7a;
+
+  --color-light-bg: #f8faff;
+  --color-light-surface: #ffffff;
+  --color-light-card: #f1f5ff;
+  --color-light-border: #dde5f5;
+  --color-light-border2: #c5d5f0;
+  --color-light-text: #0a0e1a;
+  --color-light-muted: #334155;
+
   --color-bitcoin: #F7931A;
   --color-bitcoin-dark: #e8820a;
+  --color-bitcoin-glow: #F7931A33;
+  --color-blue: #3B82F6;
+  --color-blue-dark: #2563EB;
+  --color-blue-glow: #3B82F633;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+
+  --font-display: 'Clash Display', sans-serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'Space Mono', monospace;
 }
 
-/* Base styles */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 250ms;
+}
+
 body {
-  background-color: #030712;
-  color: #f9fafb;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-deepest);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
+}
+
+html:not(.dark) body {
+  background-color: var(--color-light-bg);
+  color: var(--color-light-text);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+}
+
+.font-mono,
+code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-alt);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-bitcoin);
+}
+
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.animate-delay-1 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+
+.animate-delay-2 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+.animate-delay-3 {
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+.animate-delay-4 {
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--color-bitcoin-glow);
+  }
+
+  50% {
+    box-shadow: 0 0 20px var(--color-bitcoin-glow);
+  }
+}
+
+.animate-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(40px);
+  }
+}
+
+.animate-grid {
+  animation: gridMove 8s linear infinite;
 }
