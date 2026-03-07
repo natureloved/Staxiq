@@ -14,8 +14,8 @@ const ProtocolCard = () => {
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-4 relative z-10">
                 <div>
-                    <h2 className="text-lg font-black dark:text-white text-gray-900 font-display">DeFi Protocols</h2>
-                    <span className="text-xs font-bold dark:text-[#8899bb] text-[#4a5a7a] mt-1 block tracking-wide">Discover top yield opportunities across the Stacks ecosystem</span>
+                    <h2 className="text-2xl font-black dark:text-white text-gray-900 font-creative">DeFi Protocols</h2>
+                    <span className="text-sm font-bold dark:text-[#8899bb] text-[#4a5a7a] mt-1 block tracking-wide">Discover top yield opportunities across the Stacks ecosystem</span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -85,9 +85,9 @@ const ProtocolCard = () => {
                                     <div className="w-7 h-7 dark:bg-[#0d1117] bg-gray-50 border dark:border-[#1e2d4a] border-gray-200 rounded-full flex items-center justify-center text-base shadow-sm group-hover:scale-110 transition-transform duration-300">
                                         {protocol.icon}
                                     </div>
-                                    <h3 className="font-bold dark:text-[#f0f4ff] text-gray-900 text-xs font-display">{protocol.name}</h3>
+                                    <h3 className="font-bold dark:text-[#f0f4ff] text-gray-900 text-base font-creative">{protocol.name}</h3>
                                 </div>
-                                <span className={`px-1.5 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-bold shadow-sm ${RISK_STYLES[protocol.risk]} dark:bg-opacity-30 dark:border-opacity-50`}>
+                                <span className={`px-1.5 py-0.5 text-[10px] uppercase tracking-wider font-bold ${RISK_STYLES[protocol.risk]}`}>
                                     {protocol.risk}
                                 </span>
                             </div>
@@ -103,16 +103,16 @@ const ProtocolCard = () => {
 
                                 <div className="flex justify-between items-center text-[11px] py-2 border-y dark:border-[#1e2d4a] border-gray-100 w-full mb-2">
                                     <div className="flex flex-col">
-                                        <span className="dark:text-[#4a5a7a] text-[#8899bb] font-bold mb-0.5 uppercase tracking-wider text-[10px]">Asset</span>
+                                        <span className="dark:text-[#4a5a7a] text-[#8899bb] font-bold mb-0.5 uppercase tracking-wider text-xs">Asset</span>
                                         <span className="font-bold dark:text-[#d0d8f0] text-gray-800">{protocol.asset}</span>
                                     </div>
                                     <div className="flex flex-col items-end">
-                                        <span className="dark:text-[#4a5a7a] text-[#8899bb] font-bold mb-0.5 uppercase tracking-wider text-[10px]">TVL</span>
+                                        <span className="dark:text-[#4a5a7a] text-[#8899bb] font-bold mb-0.5 uppercase tracking-wider text-xs">TVL</span>
                                         <span className="font-bold dark:text-[#d0d8f0] text-gray-800 font-mono">{protocol.tvl}</span>
                                     </div>
                                 </div>
 
-                                <p className="text-[11px] dark:text-[#8899bb] text-gray-600 leading-relaxed font-medium">
+                                <p className="text-xs dark:text-[#8899bb] text-gray-600 leading-relaxed font-medium">
                                     {protocol.description}
                                 </p>
                             </div>
@@ -122,7 +122,7 @@ const ProtocolCard = () => {
                                     href={protocol.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-center py-2 rounded-lg border dark:border-[#1e2d4a] border-gray-200 dark:bg-[#0d1117] bg-gray-50 text-[11px] font-bold dark:text-[#a8b8d8] text-gray-700 transition-all duration-300 group-hover:border-transparent group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(247,147,26,0.3)] shadow-sm"
+                                    className="w-full flex items-center justify-center py-2 rounded-lg border dark:border-[#1e2d4a] border-gray-200 dark:bg-[#0d1117] bg-gray-50 text-xs font-bold dark:text-[#a8b8d8] text-gray-700 transition-all duration-300 group-hover:border-transparent group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(247,147,26,0.3)] shadow-sm"
                                 >
                                     <span>View Strategy</span>
                                     <svg className="w-4 h-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

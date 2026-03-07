@@ -138,7 +138,7 @@ export default function AICopilot({
                 <div className="w-20 h-20 dark:bg-[#0a0e1a] bg-gray-50 border dark:border-[#1e2d4a] border-gray-200 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
                     🤖
                 </div>
-                <h3 className="text-2xl font-black dark:text-white text-gray-900 font-display mb-2">Initialize Copilot</h3>
+                <h3 className="text-3xl font-black dark:text-white text-gray-900 font-creative mb-2">Initialize Copilot</h3>
                 <p className="dark:text-[#8899bb] text-[#4a5a7a] font-medium text-lg max-w-sm">Connect your wallet to unlock AI strategy advice and automated compounding.</p>
             </div>
         );
@@ -157,7 +157,7 @@ export default function AICopilot({
                             🤖
                         </div>
                         <div>
-                            <h2 className="dark:text-white text-gray-900 font-black text-lg font-display tracking-tight">AI DeFi Copilot</h2>
+                            <h2 className="dark:text-white text-gray-900 font-black text-2xl font-creative tracking-tight">AI DeFi Copilot</h2>
                             <p className="dark:text-[#8899bb] text-[#4a5a7a] text-xs font-bold tracking-wide">
                                 Personalized Bitcoin DeFi strategies
                             </p>
@@ -264,7 +264,7 @@ export default function AICopilot({
             {/* Sidebar History Panel */}
             <div className="dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-5 shadow-xl flex flex-col">
                 <div className="border-b dark:border-[#1e2d4a]/60 border-gray-100 pb-3 mb-3">
-                    <h3 className="dark:text-white text-gray-900 font-black text-base font-display">Strategy Log</h3>
+                    <h3 className="dark:text-white text-gray-900 font-black text-xl font-creative">Strategy Log</h3>
                     <p className="dark:text-[#4a5a7a] text-[#8899bb] text-[10px] font-bold mt-1 uppercase tracking-wider">Session Memory</p>
                 </div>
 

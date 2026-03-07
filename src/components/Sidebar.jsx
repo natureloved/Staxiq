@@ -3,17 +3,16 @@ import { NavLink } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
 const NAV_ITEMS = [
-    { path: '/', icon: '⚡', label: 'Overview', badge: null },
-    { path: '/yield', icon: '🧮', label: 'Yield Calc', badge: 'NEW' },
-    { path: '/stacking', icon: '🥩', label: 'Stacking', badge: 'NEW' },
-    { path: '/health', icon: '💊', label: 'Health Score', badge: 'NEW' },
-    { path: '/compare', icon: '📊', label: 'Compare', badge: 'NEW' },
-    { path: '/achievements', icon: '🏅', label: 'Achievements', badge: null },
+    { path: '/', label: 'Dashboard', badge: null },
+    { path: '/yield', label: 'Yield Calculator', badge: 'NEW' },
+    { path: '/stacking', label: 'Stacking', badge: 'NEW' },
+    { path: '/health', label: 'Health Score', badge: 'NEW' },
+    { path: '/compare', label: 'Compare', badge: 'NEW' },
+    { path: '/achievements', label: 'Achievements', badge: null },
 ];
 
-export default function Sidebar({ connected }) {
+export default function Sidebar({ connected, collapsed, setCollapsed }) {
     const { isDark } = useTheme();
-    const [collapsed, setCollapsed] = useState(false);
 
     return (
         <aside
@@ -26,17 +25,55 @@ export default function Sidebar({ connected }) {
                 paddingTop: '24px',
             }}
         >
+            {/* Custom Animated Toggle Button */}
             <button
                 onClick={() => setCollapsed(c => !c)}
-                className="mx-auto mb-6 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                className="mx-auto mb-6 w-8 h-8 rounded-xl flex flex-col items-center justify-center gap-[1.3px] transition-all duration-300 group hover:scale-105 active:scale-95 z-50 overflow-hidden relative"
                 style={{
-                    background: isDark ? '#141c2e' : '#f1f5ff',
-                    border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
-                    color: isDark ? '#8899bb' : '#334155',
+                    background: isDark ? 'linear-gradient(135deg, #141c2e, #0d1117)' : 'linear-gradient(135deg, #ffffff, #f1f5ff)',
+                    border: `1px solid ${isDark ? '#2a3f6a' : '#dde5f5'}`,
+                    boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.05)',
                 }}
-                title={collapsed ? 'Expand' : 'Collapse'}
+                title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
-                {collapsed ? '→' : '←'}
+                {/* Top Line */}
+                <span
+                    className="h-[1.5px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                    style={{
+                        background: isDark ? '#a8b8d8' : '#334155',
+                        transform: collapsed ? 'translateY(0) rotate(0deg)' : 'translateY(2.5px) rotate(45deg)',
+                        width: '12px',
+                    }}
+                />
+
+                {/* Middle Line (Drops downward and fades) */}
+                <span
+                    className="h-[1.5px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                    style={{
+                        background: isDark ? '#a8b8d8' : '#334155',
+                        opacity: collapsed ? 1 : 0,
+                        transform: collapsed ? 'translateY(0)' : 'translateY(12px) scale(0)',
+                        width: '12px',
+                    }}
+                />
+
+                {/* Bottom Line */}
+                <span
+                    className="h-[1.5px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                    style={{
+                        background: isDark ? '#a8b8d8' : '#334155',
+                        transform: collapsed ? 'translateY(0) rotate(0deg)' : 'translateY(-2.5px) rotate(-45deg)',
+                        width: '12px',
+                    }}
+                />
+
+                {/* Hover Glow */}
+                <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl"
+                    style={{
+                        background: 'radial-gradient(circle at center, rgba(247,147,26,0.15) 0%, transparent 70%)'
+                    }}
+                />
             </button>
 
             <nav className="flex flex-col gap-1 px-2">
@@ -58,8 +95,6 @@ export default function Sidebar({ connected }) {
                                 : isDark ? '#8899bb' : '#334155',
                         })}
                     >
-                        <span className="text-lg flex-shrink-0">{item.icon}</span>
-
                         {!collapsed && (
                             <div className="flex items-center justify-between flex-1 min-w-0">
                                 <span className="text-sm font-semibold truncate">

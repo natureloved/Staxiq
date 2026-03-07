@@ -93,9 +93,9 @@ export const PROTOCOLS = [
 ];
 
 export const RISK_STYLES = {
-    Low: 'bg-green-900/50 text-green-400 border border-green-800',
-    Medium: 'bg-yellow-900/50 text-yellow-400 border border-yellow-800',
-    High: 'bg-red-900/50 text-red-400 border border-red-800',
+    Low: 'text-green-500',
+    Medium: 'text-yellow-500',
+    High: 'text-red-500',
 };
 
 export const FILTER_TYPES = ['All', 'Lending', 'DEX', 'Yield', 'Stacking'];

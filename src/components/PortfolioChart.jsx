@@ -62,7 +62,7 @@ export default function PortfolioChart({ totalUSD }) {
             <div className="flex items-center justify-between mb-4 w-full">
                 <div>
                     <h3
-                        className="font-display font-bold text-sm"
+                        className="font-creative font-bold text-sm"
                         style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
                     >
                         Portfolio Performance
