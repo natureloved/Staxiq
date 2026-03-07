@@ -49,7 +49,7 @@ export default function PriceTicker() {
         <div className="bg-orange-500 text-white overflow-hidden py-1.5">
             <div className="flex animate-ticker whitespace-nowrap">
                 {tickerItems.map((item, i) => (
-                    <span key={i} className="inline-flex items-center gap-2 px-8 text-xs font-semibold">
+                    <span key={i} className="inline-flex items-center gap-2 px-8 text-xs font-semibold font-mono">
                         <span className="opacity-80">{item.label}:</span>
                         <span>{item.value}</span>
                         <span className={item.change >= 0 ? 'text-green-200' : 'text-red-200'}>

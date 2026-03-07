@@ -33,9 +33,10 @@
   --color-success: #22c55e;
   --color-danger: #ef4444;
 
-  --font-display: 'Clash Display', sans-serif;
-  --font-sans: 'DM Sans', sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-logo: 'Montserrat', sans-serif;
 }
 
 *,
@@ -46,9 +47,10 @@
 }
 
 body {
-  font-family: var(--font-sans);
-  background-color: var(--color-bg-deepest);
-  color: var(--color-text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -57,17 +59,24 @@ html:not(.dark) body {
   color: var(--color-light-text);
 }
 
+/* Headings — Cormorant Garamond */
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-display);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
+/* Numbers, addresses, data */
 .font-mono,
-code {
-  font-family: var(--font-mono);
+code,
+[class*="balance"],
+[class*="address"] {
+  font-family: 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 ::-webkit-scrollbar {

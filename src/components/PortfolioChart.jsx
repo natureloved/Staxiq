@@ -30,13 +30,13 @@ const CustomTooltip = ({ active, payload, isDark }) => {
             <div style={{
                 background: isDark ? '#141c2e' : '#ffffff',
                 border: `1px solid ${isDark ? '#2a3f6a' : '#dde5f5'}`,
-                borderRadius: '10px',
-                padding: '8px 14px',
+                borderRadius: '8px',
+                padding: '6px 10px',
             }}>
-                <p style={{ color: '#F7931A', fontFamily: 'Space Mono', fontSize: 13, fontWeight: 700 }}>
+                <p style={{ color: '#F7931A', fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700 }}>
                     ${payload[0].value}
                 </p>
-                <p style={{ color: isDark ? '#8899bb' : '#334155', fontSize: 11 }}>
+                <p style={{ color: isDark ? '#8899bb' : '#334155', fontSize: 9 }}>
                     {payload[0].payload.day}
                 </p>
             </div>
@@ -52,32 +52,32 @@ export default function PortfolioChart({ totalUSD }) {
 
     return (
         <div
-            className="rounded-2xl p-6 mb-6"
+            className="rounded-2xl p-4 mb-6 w-full max-w-[1000px] mx-auto"
             style={{
                 background: isDark ? '#0d1117' : '#ffffff',
                 border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
             }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4 w-full">
                 <div>
                     <h3
-                        className="font-display font-bold text-base"
+                        className="font-display font-bold text-sm"
                         style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
                     >
                         Portfolio Performance
                     </h3>
-                    <p style={{ color: isDark ? '#4a5a7a' : '#8899bb', fontSize: 12, marginTop: 2 }}>
+                    <p style={{ color: isDark ? '#4a5a7a' : '#8899bb', fontSize: 10, marginTop: 1 }}>
                         30-day overview
                     </p>
                 </div>
                 <span style={{
-                    fontSize: 12, fontWeight: 700,
-                    fontFamily: 'Space Mono',
+                    fontSize: 10, fontWeight: 700,
+                    fontFamily: "'JetBrains Mono', monospace",
                     background: '#22c55e22',
                     color: '#22c55e',
                     border: '1px solid #22c55e44',
-                    padding: '4px 12px',
+                    padding: '3px 8px',
                     borderRadius: 99,
                 }}>
                     ↑ +24.3%
@@ -85,7 +85,7 @@ export default function PortfolioChart({ totalUSD }) {
             </div>
 
             {/* Chart */}
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={140}>
                 <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                     {/* ✅ SVG defs go INSIDE AreaChart like this */}
                     <defs>

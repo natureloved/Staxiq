@@ -15,12 +15,12 @@ const Navbar = ({ connected, address, connectWallet, disconnectWallet }) => {
                     <div className="flex items-center space-x-3 group cursor-pointer">
                         <div className="relative">
                             <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shadow-[0_0_15px_rgba(247,147,26,0.5)] group-hover:scale-105 transition-transform duration-300">
-                                <span className="text-gray-950 font-black text-xl font-display">S</span>
+                                <span className="text-gray-950 font-black text-xl font-logo">S</span>
                             </div>
                             {/* Heartbeat pulse */}
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-950 border-white shadow-[0_0_8px_rgba(34,197,94,0.8)] animate-pulse"></div>
                         </div>
-                        <span className="font-bold text-2xl tracking-tight dark:text-white text-gray-900 font-display">Staxiq</span>
+                        <span className="font-bold text-2xl tracking-tight dark:text-white text-gray-900 font-logo">Staxiq</span>
                     </div>
 
                     <div className="flex items-center space-x-4">

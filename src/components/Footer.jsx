@@ -16,7 +16,7 @@ export default function Footer() {
 
                 {/* Logo */}
                 <div
-                    className="font-display font-black text-xl mb-2"
+                    className="font-logo font-black text-xl mb-2"
                     style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
                 >
                     Staxiq

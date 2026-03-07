@@ -145,20 +145,20 @@ export default function AICopilot({
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-[1000px] mx-auto">
 
             {/* Main Copilot Panel */}
-            <div className="lg:col-span-2 dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 xl:p-8 space-y-6 shadow-xl relative">
+            <div className="lg:col-span-2 dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-5 space-y-5 shadow-xl relative">
 
                 {/* Header */}
-                <div className="flex items-center justify-between border-b dark:border-[#1e2d4a]/60 border-gray-100 pb-5">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-orange-500 text-gray-950 flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(247,147,26,0.3)]">
+                <div className="flex items-center justify-between border-b dark:border-[#1e2d4a]/60 border-gray-100 pb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-orange-500 text-gray-950 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(247,147,26,0.3)]">
                             🤖
                         </div>
                         <div>
-                            <h2 className="dark:text-white text-gray-900 font-black text-xl font-display tracking-tight">AI DeFi Copilot</h2>
-                            <p className="dark:text-[#8899bb] text-[#4a5a7a] text-sm font-bold tracking-wide">
+                            <h2 className="dark:text-white text-gray-900 font-black text-lg font-display tracking-tight">AI DeFi Copilot</h2>
+                            <p className="dark:text-[#8899bb] text-[#4a5a7a] text-xs font-bold tracking-wide">
                                 Personalized Bitcoin DeFi strategies
                             </p>
                         </div>
@@ -175,7 +175,7 @@ export default function AICopilot({
                             <button
                                 key={risk}
                                 onClick={() => setRiskProfile(risk)}
-                                className={`px-5 py-3 rounded-xl text-sm font-bold border-2 transition-all duration-300 flex-1 sm:flex-none ${riskProfile === risk
+                                className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all duration-300 flex-1 sm:flex-none ${riskProfile === risk
                                     ? RISK_STYLES[risk]
                                     : 'dark:bg-[#0a0e1a]/50 bg-gray-50 dark:text-[#8899bb] text-[#4a5a7a] dark:border-[#1e2d4a] border-gray-200 hover:border-gray-300 dark:hover:border-[#3a5080] dark:hover:text-[#d0d8f0] hover:text-gray-800'
                                     }`}
@@ -190,7 +190,7 @@ export default function AICopilot({
                 <button
                     onClick={handleGetStrategy}
                     disabled={loading || anchoring}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-[#1a2540] disabled:text-[#8899bb] text-white font-black py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-[0_10px_20px_rgba(247,147,26,0.2)] hover:shadow-[0_10px_20px_rgba(247,147,26,0.4)] disabled:shadow-none hover:-translate-y-0.5 disabled:translate-y-0"
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-[#1a2540] disabled:text-[#8899bb] text-white text-sm font-black py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(247,147,26,0.2)] hover:shadow-[0_10px_20px_rgba(247,147,26,0.4)] disabled:shadow-none hover:-translate-y-0.5 disabled:translate-y-0"
                 >
                     {loading ? (
                         <>
@@ -220,7 +220,7 @@ export default function AICopilot({
 
                 {/* AI Response Card */}
                 {strategy && !loading ? (
-                    <div className="dark:bg-[#0a0e1a]/80 bg-gray-50 border dark:border-[#1e2d4a] border-gray-200 rounded-xl p-6 space-y-5 shadow-inner relative overflow-hidden">
+                    <div className="dark:bg-[#0a0e1a]/80 bg-gray-50 border dark:border-[#1e2d4a] border-gray-200 rounded-xl p-5 space-y-4 shadow-inner relative overflow-hidden">
 
                         <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-400 to-orange-500"></div>
 
@@ -262,10 +262,10 @@ export default function AICopilot({
             </div>
 
             {/* Sidebar History Panel */}
-            <div className="dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 shadow-xl flex flex-col">
-                <div className="border-b dark:border-[#1e2d4a]/60 border-gray-100 pb-4 mb-4">
-                    <h3 className="dark:text-white text-gray-900 font-black text-lg font-syne">Strategy Log</h3>
-                    <p className="dark:text-[#4a5a7a] text-[#8899bb] text-xs font-bold mt-1 uppercase tracking-wider">Session Memory</p>
+            <div className="dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-5 shadow-xl flex flex-col">
+                <div className="border-b dark:border-[#1e2d4a]/60 border-gray-100 pb-3 mb-3">
+                    <h3 className="dark:text-white text-gray-900 font-black text-base font-display">Strategy Log</h3>
+                    <p className="dark:text-[#4a5a7a] text-[#8899bb] text-[10px] font-bold mt-1 uppercase tracking-wider">Session Memory</p>
                 </div>
 
                 <div className="flex-grow space-y-4">

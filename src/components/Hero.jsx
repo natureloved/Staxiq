@@ -31,8 +31,8 @@ export default function Hero() {
 
                 {/* Status pill */}
                 <div
-                    className="inline-flex items-center gap-2 text-xs font-semibold
-            tracking-widest uppercase px-4 py-1.5 rounded-full mb-8"
+                    className="inline-flex items-center gap-1.5 text-[10px] font-semibold
+            tracking-wider uppercase px-3 py-1 rounded-full mb-8"
                     style={{
                         backgroundColor: isDark ? '#141c2e' : '#f1f5ff',
                         border: `1px solid ${isDark ? '#2a3f6a' : '#c5d5f0'}`,
@@ -53,14 +53,16 @@ export default function Hero() {
                 >
                     <span
                         className="block"
-                        style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
+                        style={{ color: isDark ? '#f0f4ff' : '#0a0e1a', fontFamily: "'Clash Display', sans-serif" }}
                     >
                         Your Bitcoin DeFi
                     </span>
                     <span
                         className="block"
                         style={{
-                            background: 'linear-gradient(135deg, #F7931A 0%, #3B82F6 100%)',
+                            fontFamily: "'Clash Display', sans-serif",
+                            fontWeight: 700,
+                            background: 'linear-gradient(135deg, #F7931A 0%, #e8820a 40%, #3B82F6 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text',
@@ -105,7 +107,7 @@ export default function Hero() {
                         >
                             <div
                                 className="font-display font-black text-xl"
-                                style={{ color: stat.color, fontFamily: "'Space Mono', monospace" }}
+                                style={{ color: stat.color, fontFamily: "'JetBrains Mono', monospace" }}
                             >
                                 {stat.value}
                             </div>
