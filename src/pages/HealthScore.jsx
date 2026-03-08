@@ -105,7 +105,7 @@ export default function HealthScore({ connected, address }) {
     const { isDark } = useTheme();
     const { isDemoMode } = useDemo();
     const showData = connected || isDemoMode;
-    const livePortfolio = usePortfolio(isDemoMode ? null : address);
+    const { portfolio: livePortfolio } = usePortfolio(isDemoMode ? null : address);
     const [animatedScore, setAnimatedScore] = useState(0);
 
     const { score, issues, wins } = isDemoMode
@@ -114,7 +114,7 @@ export default function HealthScore({ connected, address }) {
             stxBalance: livePortfolio.stxBalance || '0',
             sbtcBalance: livePortfolio.sbtcBalance || '0',
             totalUSD: livePortfolio.totalUSD || 0,
-            txCount: livePortfolio.txCount || 0,
+            txCount: livePortfolio.txHistory?.length || 0,
         });
 
     useEffect(() => {

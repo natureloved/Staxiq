@@ -19,7 +19,8 @@ export default function StackingTracker({ connected, address }) {
     const { isDark } = useTheme();
     const { isDemoMode } = useDemo();
     const showData = connected || isDemoMode;
-    const { stxBalance } = usePortfolio(isDemoMode ? null : address);
+    const { portfolio: livePortfolio } = usePortfolio(isDemoMode ? null : address);
+    const stxBalance = livePortfolio.stxBalance;
 
     const d = isDemoMode ? DEMO_STACKING : {
         stackedSTX: parseFloat(stxBalance) || 0,
@@ -271,13 +272,13 @@ export default function StackingTracker({ connected, address }) {
                                 className="font-mono font-black"
                                 style={{ color: '#22c55e' }}
                             >
-                                +{totalSTXEarned} STX
+                                +{d.totalSTXEarned} STX
                             </p>
                             <p
                                 className="font-mono text-xs"
                                 style={{ color: '#F7931A' }}
                             >
-                                +{totalBtcEarned} BTC
+                                +{d.totalBTCEarned} BTC
                             </p>
                         </div>
                     </div>
