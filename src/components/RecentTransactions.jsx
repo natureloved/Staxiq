@@ -164,16 +164,6 @@ export default function RecentTransactions({ address }) {
                         >
                             {/* Left — protocol + action */}
                             <div className="flex items-center gap-3 min-w-0">
-                                <div
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0"
-                                    style={{
-                                        background: `${tx.color}18`,
-                                        color: tx.color,
-                                        fontFamily: "'JetBrains Mono', monospace",
-                                    }}
-                                >
-                                    {tx.protocol.slice(0, 2).toUpperCase()}
-                                </div>
                                 <div className="min-w-0">
                                     <p className="font-bold text-sm truncate" style={{ color: s.text }}>
                                         {tx.action}
