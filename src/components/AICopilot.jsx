@@ -308,42 +308,44 @@ export default function AICopilot({ connected, address, stxBalance, sbtcBalance,
             </div>
 
             {/* Generate button */}
-            <button
-                onClick={handleGetStrategy}
-                disabled={loading || anchoring}
-                className="w-full py-2 rounded-xl font-bold text-white text-sm
-            transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]
-            disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100
-            flex items-center justify-center gap-2"
-                style={{
-                    background: loading || anchoring
-                        ? '#374151'
-                        : 'linear-gradient(135deg, #F7931A, #e8820a)',
-                    boxShadow: loading || anchoring ? 'none' : '0 4px 16px #F7931A33',
-                }}
-            >
-                {loading ? (
-                    <>
-                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                        Analyzing your portfolio…
-                    </>
-                ) : anchoring ? (
-                    <>
-                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                        Anchoring to Bitcoin…
-                    </>
-                ) : strategy ? (
-                    'Regenerate Strategy'
-                ) : (
-                    '🎯 Get My Personalized Strategy'
-                )}
-            </button>
+            <div className="flex justify-center">
+                <button
+                    onClick={handleGetStrategy}
+                    disabled={loading || anchoring}
+                    className={`${strategy && !loading && !anchoring ? 'px-8' : 'w-full'} py-2 rounded-xl font-bold text-white text-sm
+                transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]
+                disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100
+                flex items-center justify-center gap-2`}
+                    style={{
+                        background: loading || anchoring
+                            ? '#374151'
+                            : 'linear-gradient(135deg, #F7931A, #e8820a)',
+                        boxShadow: loading || anchoring ? 'none' : '0 4px 16px #F7931A33',
+                    }}
+                >
+                    {loading ? (
+                        <>
+                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
+                            Analyzing your portfolio…
+                        </>
+                    ) : anchoring ? (
+                        <>
+                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
+                            Anchoring to Bitcoin…
+                        </>
+                    ) : strategy ? (
+                        'Regenerate Strategy'
+                    ) : (
+                        '🎯 Get My Personalized Strategy'
+                    )}
+                </button>
+            </div>
 
             {/* Error */}
             {error && (
@@ -361,7 +363,7 @@ export default function AICopilot({ connected, address, stxBalance, sbtcBalance,
 
             {/* Strategy output */}
             {strategy && !loading && sections.length > 0 && (
-                <div className="mt-6">
+                <div className="mt-6 pb-6">
                     <div className="flex items-center gap-2 mb-3">
                         <span
                             className="w-1.5 h-1.5 rounded-full bg-green-400"
