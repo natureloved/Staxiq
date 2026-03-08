@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import Sidebar from './Sidebar';
+import Sidebar, { MobileNav } from './Sidebar';
 
 export default function DashboardLayout({ connected, children }) {
     const { isDark } = useTheme();
@@ -8,24 +8,35 @@ export default function DashboardLayout({ connected, children }) {
 
     return (
         <div
-            className="flex"
-            style={{ minHeight: 'calc(100vh - 88px)' }}
+            className="flex items-start"
+            style={{ minHeight: connected ? 'calc(100vh - 88px)' : undefined }}
         >
-            <Sidebar connected={connected} collapsed={collapsed} setCollapsed={setCollapsed} />
+            {/* Sidebar — desktop only */}
+            {connected && (
+                <div className="hidden md:block">
+                    <Sidebar connected={connected} collapsed={collapsed} setCollapsed={setCollapsed} />
+                </div>
+            )}
+
+            {/* Main content */}
             <main
                 className="flex-1 overflow-auto flex justify-center transition-all duration-300"
                 style={{
                     background: isDark ? '#0a0e1a' : '#f8faff',
-                    padding: '32px',
+                    padding: connected ? 'clamp(16px, 3vw, 32px)' : undefined,
+                    paddingBottom: connected ? '80px' : undefined,
                 }}
             >
                 <div
                     className="w-full transition-all duration-300"
-                    style={{ maxWidth: collapsed ? 'calc(100% - 156px)' : '100%' }}
+                    style={{ maxWidth: (connected && collapsed) ? 'calc(100% - 156px)' : '100%' }}
                 >
                     {children}
                 </div>
             </main>
+
+            {/* Mobile bottom nav — only shown when connected */}
+            {connected && <MobileNav />}
         </div>
     );
 }

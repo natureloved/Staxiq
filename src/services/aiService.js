@@ -104,8 +104,8 @@ ${isNewUser ? `
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
-                    temperature: 0.8,
-                    maxOutputTokens: 600,
+                    temperature: 0.7,
+                    maxOutputTokens: 1500,
                 },
             }),
         }

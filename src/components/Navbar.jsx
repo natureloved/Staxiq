@@ -8,7 +8,9 @@ const Navbar = ({ connected, address, connectWallet, disconnectWallet }) => {
 
     return (
         <header className="border-b dark:border-[#1e2d4a] border-gray-200 dark:bg-[#0a0e1a]/80 bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
-            <PriceTicker />
+            <div className="hidden sm:block">
+                <PriceTicker />
+            </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">

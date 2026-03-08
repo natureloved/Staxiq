@@ -1,8 +1,17 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { useDemo } from '../context/DemoContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Hero() {
     const { isDark } = useTheme();
+    const { enterDemo } = useDemo();
+    const navigate = useNavigate();
+
+    function handleTryDemo() {
+        enterDemo();
+        navigate('/');
+    }
 
     return (
         <section className="relative overflow-hidden">
@@ -120,6 +129,32 @@ export default function Hero() {
                         </div>
                     ))}
                 </div>
+
+                {/* Try Demo Button */}
+                <div className="mt-8 flex flex-col items-center justify-center gap-4">
+                    <button
+                        onClick={handleTryDemo}
+                        className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]"
+                        style={{
+                            background: isDark ? '#1a2540' : '#f1f5ff',
+                            border: `1px solid ${isDark ? '#2a3f6a' : '#c5d5f0'}`,
+                            color: isDark ? '#f0f4ff' : '#0a0e1a',
+                            boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.05)',
+                        }}
+                    >
+                        Try Demo Mode
+                        <span
+                            className="text-[10px] px-2 py-0.5 rounded-full font-black ml-2"
+                            style={{ background: '#F7931A', color: '#fff' }}
+                        >
+                            NO WALLET NEEDED
+                        </span>
+                    </button>
+                    <p style={{ color: isDark ? '#4a5a7a' : '#8899bb', fontSize: 12 }}>
+                        See a live preview with a sample portfolio
+                    </p>
+                </div>
+
             </div>
         </section>
     );

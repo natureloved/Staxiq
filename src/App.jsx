@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { DemoProvider, useDemo } from './context/DemoContext';
 import { useWallet } from './hooks/useWallet';
 import Onboarding from './components/Onboarding';
 import Navbar from './components/Navbar';
@@ -15,9 +16,12 @@ import HealthScore from './pages/HealthScore';
 import CompareProtocols from './pages/CompareProtocols';
 import Achievements from './pages/Achievements';
 
+
 function AppContent() {
   const { isDark } = useTheme();
   const { connected, address, connectWallet, disconnectWallet } = useWallet();
+
+  const { isDemoMode } = useDemo();
 
   return (
     <div
@@ -34,7 +38,7 @@ function AppContent() {
         disconnectWallet={disconnectWallet}
       />
 
-      {!connected && <Hero />}
+      {(!connected && !isDemoMode) && <Hero />}
 
       <DashboardLayout connected={connected}>
         <Routes>
@@ -56,6 +60,7 @@ function AppContent() {
           <Route path="/achievements" element={
             <Achievements connected={connected} address={address} />
           } />
+
         </Routes>
       </DashboardLayout>
 
@@ -68,8 +73,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <Onboarding onComplete={() => { }} />
-        <AppContent />
+        <DemoProvider>
+          <Onboarding onComplete={() => { }} />
+          <AppContent />
+        </DemoProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

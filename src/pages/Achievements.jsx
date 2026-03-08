@@ -144,27 +144,27 @@ export default function Achievements({ connected, address }) {
                         className="font-display font-bold text-3xl mb-1"
                         style={{ color: s('text') }}
                     >
-                        🏅 Achievements
+                        Achievements
                     </h1>
                     <p style={{ color: s('muted'), fontSize: 14 }}>
                         Earn badges by exploring Staxiq and growing your Bitcoin DeFi portfolio.
                     </p>
                 </div>
                 <div
-                    className="rounded-2xl px-5 py-3 text-center"
+                    className="rounded-xl px-3 py-1.5 text-center"
                     style={{
                         background: 'linear-gradient(135deg, #F7931A22, #F7931A11)',
                         border: '1px solid #F7931A33',
                     }}
                 >
                     <p
-                        className="font-mono font-black text-3xl"
+                        className="font-mono font-black text-xl"
                         style={{ color: '#F7931A' }}
                     >
                         {earned.length}/{ALL_BADGES.length}
                     </p>
                     <p
-                        className="text-xs font-bold uppercase tracking-widest"
+                        className="text-[10px] font-bold uppercase tracking-widest"
                         style={{ color: '#F7931A' }}
                     >
                         Badges Earned
@@ -203,10 +203,10 @@ export default function Achievements({ connected, address }) {
             {earned.length > 0 && (
                 <div>
                     <h2
-                        className="font-display font-bold text-lg mb-4"
-                        style={{ color: s('text') }}
+                        className="font-bold text-lg mb-4"
+                        style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
                     >
-                        ✅ Earned ({earned.length})
+                        Earned ({earned.length})
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {earned.map(badge => (
@@ -220,8 +220,7 @@ export default function Achievements({ connected, address }) {
                                 }}
                             >
                                 <div
-                                    className="w-10 h-10 rounded-2xl mx-auto mb-3 flex items-center
-                    justify-center text-xl"
+                                    className="w-7 h-7 rounded-xl mx-auto mb-2 flex items-center justify-center text-base"
                                     style={{
                                         background: `${badge.color}22`,
                                         border: `1px solid ${badge.color}44`,
@@ -251,10 +250,10 @@ export default function Achievements({ connected, address }) {
             {locked.length > 0 && (
                 <div>
                     <h2
-                        className="font-display font-bold text-lg mb-4"
-                        style={{ color: s('text') }}
+                        className="font-bold text-lg mb-4"
+                        style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
                     >
-                        🔒 Locked ({locked.length})
+                        Locked ({locked.length})
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {locked.map(badge => (
@@ -267,8 +266,7 @@ export default function Achievements({ connected, address }) {
                                 }}
                             >
                                 <div
-                                    className="w-10 h-10 rounded-2xl mx-auto mb-3 flex items-center
-                    justify-center text-xl grayscale"
+                                    className="w-7 h-7 rounded-xl mx-auto mb-2 flex items-center justify-center text-base grayscale"
                                     style={{
                                         background: isDark ? '#1e2d4a' : '#f1f5ff',
                                         border: `1px solid ${s('border')}`,

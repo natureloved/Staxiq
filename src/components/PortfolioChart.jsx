@@ -52,7 +52,7 @@ export default function PortfolioChart({ totalUSD }) {
 
     return (
         <div
-            className="rounded-2xl p-4 mb-6 w-full max-w-[1000px] mx-auto"
+            className="rounded-2xl p-4 mb-6 w-full"
             style={{
                 background: isDark ? '#0d1117' : '#ffffff',
                 border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
@@ -62,7 +62,7 @@ export default function PortfolioChart({ totalUSD }) {
             <div className="flex items-center justify-between mb-4 w-full">
                 <div>
                     <h3
-                        className="font-creative font-bold text-sm"
+                        className="font-creative font-black text-xl"
                         style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
                     >
                         Portfolio Performance

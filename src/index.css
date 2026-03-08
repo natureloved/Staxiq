@@ -180,3 +180,56 @@ code,
 .animate-grid {
   animation: gridMove 8s linear infinite;
 }
+
+/* ── Mobile safe areas ────────────────────────────── */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .mobile-safe-bottom {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ── Responsive hero font ──────────────────────────── */
+.hero-title {
+  font-size: clamp(28px, 6vw, 60px) !important;
+}
+
+/* ── Mobile-only overrides ────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Touch targets */
+  button,
+  a {
+    min-height: 44px;
+  }
+
+  /* Portfolio grid: 2 columns on mobile */
+  .portfolio-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Protocol grid: 1 column on mobile */
+  .protocol-grid {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+
+  /* Stats row: 2 columns on mobile */
+  .stats-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .stat-item {
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border) !important;
+  }
+}
+
+/* ── Prevent horizontal overflow ──────────────────── */
+body {
+  overflow-x: hidden;
+}
+
+img,
+video {
+  height: auto;
+}

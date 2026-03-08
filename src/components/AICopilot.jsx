@@ -1,308 +1,423 @@
-import React, { useState, useEffect } from 'react';
-import { useAIAdvisor } from '../hooks/useAIAdvisor';
+// src/components/AICopilot.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import { useTheme } from '../context/ThemeContext';
+import { getAIStrategy } from '../services/aiService';
+import { useProtocolData } from '../hooks/useProtocolData';
 import {
     saveRiskProfile,
     anchorStrategy,
-    getStrategyCount
+    getStrategyCount,
 } from '../services/contractService';
 
-const RISK_OPTIONS = ['Conservative', 'Balanced', 'Aggressive'];
+const RISK_OPTIONS = ['HODLer', 'Builder', 'Degen'];
 
-const RISK_STYLES = {
-    Conservative: 'dark:bg-green-900/30 bg-green-100 dark:text-green-400 text-green-700 dark:border-green-700/50 border-green-300',
-    Balanced: 'dark:bg-yellow-900/30 bg-yellow-100 dark:text-yellow-400 text-yellow-700 dark:border-yellow-700/50 border-yellow-300',
-    Aggressive: 'dark:bg-red-900/30 bg-red-100 dark:text-red-400 text-red-700 dark:border-red-700/50 border-red-300',
+const RISK_CONFIG = {
+    HODLer: { color: '#22c55e', bg: '#22c55e18', border: '#22c55e44', label: 'HODLer' },
+    Builder: { color: '#f59e0b', bg: '#f59e0b18', border: '#f59e0b44', label: 'Builder' },
+    Degen: { color: '#ef4444', bg: '#ef444418', border: '#ef444444', label: 'Degen' },
 };
 
-// Typewriter Effect Component
-const TypewriterText = ({ text, onComplete }) => {
-    const [displayedText, setDisplayedText] = useState('');
+// Parses the structured AI output into labeled sections
+function parseStrategy(text) {
+    const sections = [];
+    const lines = text.split('\n');
+    let current = null;
 
-    useEffect(() => {
-        setDisplayedText('');
-        let i = 0;
-        const speed = 15; // ms per char
+    const SECTION_EMOJIS = ['👋', '🎯', '📖', '📊', '💰', '🛡️', '🚀', '⚡', '🔁', '⚠️', '💡', '✅'];
 
-        const timer = setInterval(() => {
-            if (i < text.length) {
-                setDisplayedText(prev => prev + text.charAt(i));
-                i++;
-            } else {
-                clearInterval(timer);
-                if (onComplete) onComplete();
-            }
-        }, speed);
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
 
-        return () => clearInterval(timer);
-    }, [text]);
+        const startsSection = SECTION_EMOJIS.some(e => trimmed.startsWith(e));
 
+        if (startsSection) {
+            if (current) sections.push(current);
+            current = { heading: trimmed, body: [] };
+        } else if (current) {
+            current.body.push(trimmed);
+        } else {
+            sections.push({ heading: null, body: [trimmed] });
+        }
+    }
+    if (current) sections.push(current);
+    return sections;
+}
+
+// Color-codes section headings (isDark needed for the default fallback)
+function getSectionColor(heading, isDark) {
+    if (!heading) return isDark ? '#8899bb' : '#334155';
+    if (heading.startsWith('⚠️') || heading.startsWith('🛡️')) return '#f59e0b';
+    if (heading.startsWith('🚀') || heading.startsWith('✅')) return '#22c55e';
+    if (heading.startsWith('💰') || heading.startsWith('📊')) return '#F7931A';
+    if (heading.startsWith('⚡') || heading.startsWith('🔁')) return '#3B82F6';
+    return isDark ? '#f0f4ff' : '#0a0e1a';
+}
+
+// Strip leading emoji from a heading string
+function stripEmoji(str) {
+    if (!str) return str;
+    return str.replace(/^[\p{Emoji}\u{FE0F}\u{20E3}\s]+/u, '').trim();
+}
+
+// Renders one parsed section — no individual box, just spaced content
+function StrategySection({ heading, body, isDark, isLast, headingColor }) {
     return (
-        <div className="dark:text-[#a8b8d8] text-gray-700 text-[15px] leading-relaxed whitespace-pre-line font-medium prose dark:prose-invert prose-p:my-2">
-            {displayedText.split('\n').map((line, i) => {
-                if (line.includes(': ')) {
-                    const parts = line.split(': ');
+        <div style={{ paddingBottom: isLast ? 0 : 16, marginBottom: isLast ? 0 : 16, borderBottom: isLast ? 'none' : `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}` }}>
+            {heading && (
+                <p
+                    className="font-bold text-sm mb-2"
+                    style={{ color: headingColor, letterSpacing: '0.01em' }}
+                >
+                    {stripEmoji(heading)}
+                </p>
+            )}
+            <div className="space-y-1">
+                {body.map((line, i) => {
+                    const isStep = /^(Step\s*\d+:|^\d+\.|^•)/.test(line);
+                    const isAlloc = line.includes('%') && line.includes(':');
+
                     return (
-                        <p key={i} className="my-2">
-                            <strong className="dark:text-white text-gray-900 font-bold">{parts[0]}:</strong> {parts.slice(1).join(': ')}
+                        <p
+                            key={i}
+                            className="text-sm leading-relaxed"
+                            style={{
+                                color: isDark ? '#c8d8f0' : '#334155',
+                                borderLeft: isStep ? `2px solid ${headingColor}44` : 'none',
+                                paddingLeft: isStep ? '10px' : 0,
+                                fontWeight: isAlloc ? 600 : 400,
+                                fontFamily: isAlloc ? "'JetBrains Mono', monospace" : 'inherit',
+                            }}
+                        >
+                            {line}
                         </p>
                     );
-                }
-                return <p key={i} className="my-2">{line}</p>;
-            })}
+                })}
+            </div>
         </div>
     );
-};
+}
 
-export default function AICopilot({
-    connected,
-    address,
-    stxBalance,
-    sbtcBalance,
-    totalUSD
-}) {
-    const {
-        strategy,
-        loading,
-        error,
-        riskProfile,
-        setRiskProfile,
-        fetchStrategy,
-    } = useAIAdvisor({ address, stxBalance, sbtcBalance, totalUSD });
+// Typing animation for the heading
+function TypingText({ text, speed = 30 }) {
+    const [displayed, setDisplayed] = useState('');
+    useEffect(() => {
+        setDisplayed('');
+        let i = 0;
+        const timer = setInterval(() => {
+            setDisplayed(text.slice(0, i + 1));
+            i++;
+            if (i >= text.length) clearInterval(timer);
+        }, speed);
+        return () => clearInterval(timer);
+    }, [text]);
+    return <span>{displayed}</span>;
+}
 
+export default function AICopilot({ connected, address, stxBalance, sbtcBalance, totalUSD, txCount, demoStrategy }) {
+    const { isDark } = useTheme();
+    const { protocols } = useProtocolData();
+
+    const [riskProfile, setRiskProfile] = useState('Balanced');
+    const [strategy, setStrategy] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [anchored, setAnchored] = useState(false);
     const [anchorTxId, setAnchorTxId] = useState(null);
-    const [strategyCount, setStrategyCount] = useState(0);
     const [anchoring, setAnchoring] = useState(false);
+    const [strategyCount, setStrategyCount] = useState(0);
+    const [sections, setSections] = useState([]);
 
-    const [typewriterComplete, setTypewriterComplete] = useState(false);
-    const [history, setHistory] = useState([]);
+    const s = (key) => ({
+        bg: isDark ? '#0d1117' : '#ffffff',
+        card: isDark ? '#141c2e' : '#f8faff',
+        border: isDark ? '#1e2d4a' : '#dde5f5',
+        text: isDark ? '#f0f4ff' : '#0a0e1a',
+        muted: isDark ? '#8899bb' : '#334155',
+        dim: isDark ? '#4a5a7a' : '#8899bb',
+    })[key];
 
     useEffect(() => {
         if (address) {
-            getStrategyCount(address).then(count => setStrategyCount(count));
+            getStrategyCount(address).then(c => setStrategyCount(Number(c) || 0));
         }
     }, [address]);
 
-    // Save to history list
+    // Pre-load demo strategy immediately
     useEffect(() => {
-        if (strategy && typewriterComplete) {
-            setHistory(prev => {
-                const newEntry = { text: strategy, risk: riskProfile, date: new Date().toLocaleTimeString() };
-                const exists = prev.some(h => h.text === strategy);
-                if (exists) return prev;
-                return [newEntry, ...prev].slice(0, 3);
-            });
+        if (demoStrategy) {
+            setStrategy(demoStrategy);
+            setSections(parseStrategy(demoStrategy));
         }
-    }, [strategy, typewriterComplete, riskProfile]);
+    }, [demoStrategy]);
 
     async function handleGetStrategy() {
+        if (demoStrategy) {
+            // In demo mode just re-parse the demo strategy
+            setSections(parseStrategy(demoStrategy));
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        setStrategy(null);
+        setSections([]);
         setAnchored(false);
         setAnchorTxId(null);
-        setTypewriterComplete(false);
 
-        const result = await fetchStrategy();
+        try {
+            const result = await getAIStrategy({
+                address,
+                stxBalance,
+                sbtcBalance,
+                totalUSD,
+                riskProfile,
+                protocols,
+                strategyCount,
+                txCount: Number(txCount) || 0,
+            });
 
-        if (result) {
+            setStrategy(result);
+            setSections(parseStrategy(result));
+
+            // Anchor to Bitcoin
             try {
                 setAnchoring(true);
                 const encoder = new TextEncoder();
-                const data = encoder.encode(result);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 64);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(result));
+                const hashHex = Array.from(new Uint8Array(hashBuffer))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('')
+                    .slice(0, 64);
 
-                const [, anchorTx] = await Promise.all([
+                const topProtocol = protocols.find(p => p.apy)?.name ?? 'StackingDAO';
+                const [, txId] = await Promise.all([
                     saveRiskProfile(riskProfile, address),
-                    anchorStrategy(hashHex, 'Staxiq'),
+                    anchorStrategy(hashHex, topProtocol),
                 ]);
 
-                if (anchorTx) {
-                    setAnchorTxId(anchorTx);
+                if (txId) {
+                    setAnchorTxId(txId);
                     setAnchored(true);
                     const newCount = await getStrategyCount(address);
-                    setStrategyCount(newCount);
+                    setStrategyCount(Number(newCount) || 0);
                 }
             } catch (anchorErr) {
                 console.warn('Anchoring failed silently:', anchorErr);
             } finally {
                 setAnchoring(false);
             }
+        } catch (err) {
+            setError('Failed to generate strategy. Check your API key or try again.');
+        } finally {
+            setLoading(false);
         }
     }
 
+    // ── Not connected state ──────────────────────────────────────────────────
     if (!connected) {
         return (
-            <div className="dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-8 text-center h-[500px] flex flex-col items-center justify-center shadow-xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b dark:from-orange-500/5 from-orange-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-
-                <div className="w-20 h-20 dark:bg-[#0a0e1a] bg-gray-50 border dark:border-[#1e2d4a] border-gray-200 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
+            <div
+                className="rounded-2xl p-10 flex flex-col items-center justify-center text-center gap-4"
+                style={{ background: s('bg'), border: `1px solid ${s('border')}` }}
+            >
+                <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
+                    style={{ background: '#3B82F611', border: '1px solid #3B82F633' }}
+                >
                     🤖
                 </div>
-                <h3 className="text-3xl font-black dark:text-white text-gray-900 font-creative mb-2">Initialize Copilot</h3>
-                <p className="dark:text-[#8899bb] text-[#4a5a7a] font-medium text-lg max-w-sm">Connect your wallet to unlock AI strategy advice and automated compounding.</p>
+                <div>
+                    <p className="font-bold text-lg mb-1" style={{ color: s('text') }}>
+                        AI DeFi Copilot
+                    </p>
+                    <p className="text-sm" style={{ color: s('muted') }}>
+                        Connect your wallet to get a personalized Bitcoin DeFi strategy
+                    </p>
+                </div>
             </div>
         );
     }
 
+    const riskCfg = RISK_CONFIG[riskProfile];
+
+    // ── Main UI ──────────────────────────────────────────────────────────────
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-[1000px] mx-auto">
-
-            {/* Main Copilot Panel */}
-            <div className="lg:col-span-2 dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-5 space-y-5 shadow-xl relative">
-
-                {/* Header */}
-                <div className="flex items-center justify-between border-b dark:border-[#1e2d4a]/60 border-gray-100 pb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-orange-500 text-gray-950 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(247,147,26,0.3)]">
-                            🤖
-                        </div>
-                        <div>
-                            <h2 className="dark:text-white text-gray-900 font-black text-2xl font-creative tracking-tight">AI DeFi Copilot</h2>
-                            <p className="dark:text-[#8899bb] text-[#4a5a7a] text-xs font-bold tracking-wide">
-                                Personalized Bitcoin DeFi strategies
-                            </p>
-                        </div>
+        <div
+            className="rounded-2xl p-0.5"
+            style={{ background: s('bg'), border: `1px solid ${s('border')}` }}
+        >
+            {/* Header */}
+            <div
+                className="px-6 py-5 flex items-center justify-between"
+                style={{ borderBottom: `1px solid ${s('border')}` }}
+            >
+                <div className="flex items-center gap-3">
+                    <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+                        style={{ background: '#3B82F611', border: '1px solid #3B82F633' }}
+                    >
+                        🤖
+                    </div>
+                    <div>
+                        <p className="font-bold text-base" style={{ color: s('text') }}>
+                            AI DeFi Copilot
+                        </p>
+                        <p className="text-xs" style={{ color: s('dim') }}>
+                            Powered by Gemini · Anchored on Bitcoin
+                        </p>
                     </div>
                 </div>
 
-                {/* Risk Selector */}
-                <div className="space-y-3">
-                    <p className="dark:text-[#8899bb] text-[#4a5a7a] text-xs font-bold uppercase tracking-widest">
-                        Tolerance Profile:
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                        {RISK_OPTIONS.map(risk => (
+                {/* Strategy count badge */}
+                {strategyCount > 0 && (
+                    <div
+                        className="px-3 py-1.5 rounded-full text-xs font-bold"
+                        style={{
+                            background: '#F7931A11',
+                            border: '1px solid #F7931A33',
+                            color: '#F7931A',
+                        }}
+                    >
+                        ⛓️ {strategyCount} anchored on Bitcoin
+                    </div>
+                )}
+            </div>
+
+            <div className="p-6 space-y-5">
+
+                <div className="grid grid-cols-3 gap-2">
+                    {RISK_OPTIONS.map(r => {
+                        const cfg = RISK_CONFIG[r];
+                        const active = riskProfile === r;
+                        return (
                             <button
-                                key={risk}
-                                onClick={() => setRiskProfile(risk)}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all duration-300 flex-1 sm:flex-none ${riskProfile === risk
-                                    ? RISK_STYLES[risk]
-                                    : 'dark:bg-[#0a0e1a]/50 bg-gray-50 dark:text-[#8899bb] text-[#4a5a7a] dark:border-[#1e2d4a] border-gray-200 hover:border-gray-300 dark:hover:border-[#3a5080] dark:hover:text-[#d0d8f0] hover:text-gray-800'
-                                    }`}
+                                key={r}
+                                onClick={() => setRiskProfile(r)}
+                                className="py-1.5 px-2 rounded-lg text-xs font-bold transition-all duration-200"
+                                style={{
+                                    background: active ? cfg.bg : 'transparent',
+                                    border: `1px solid ${active ? cfg.border : s('border')}`,
+                                    color: active ? cfg.color : s('muted'),
+                                }}
                             >
-                                {risk}
+                                {cfg.label}
                             </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Generate button */}
+            <button
+                onClick={handleGetStrategy}
+                disabled={loading || anchoring}
+                className="w-full py-2 rounded-xl font-bold text-white text-sm
+            transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]
+            disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100
+            flex items-center justify-center gap-2"
+                style={{
+                    background: loading || anchoring
+                        ? '#374151'
+                        : 'linear-gradient(135deg, #F7931A, #e8820a)',
+                    boxShadow: loading || anchoring ? 'none' : '0 4px 16px #F7931A33',
+                }}
+            >
+                {loading ? (
+                    <>
+                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        Analyzing your portfolio…
+                    </>
+                ) : anchoring ? (
+                    <>
+                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        Anchoring to Bitcoin…
+                    </>
+                ) : strategy ? (
+                    'Regenerate Strategy'
+                ) : (
+                    '🎯 Get My Personalized Strategy'
+                )}
+            </button>
+
+            {/* Error */}
+            {error && (
+                <div
+                    className="rounded-xl px-4 py-3 text-sm"
+                    style={{
+                        background: '#ef444418',
+                        border: '1px solid #ef444444',
+                        color: '#ef4444',
+                    }}
+                >
+                    {error}
+                </div>
+            )}
+
+            {/* Strategy output */}
+            {strategy && !loading && sections.length > 0 && (
+                <div className="mt-6">
+                    <div className="flex items-center gap-2 mb-3">
+                        <span
+                            className="w-1.5 h-1.5 rounded-full bg-green-400"
+                            style={{ animation: 'pulse 2s infinite' }}
+                        />
+                        <span className="text-xs font-semibold" style={{ color: isDark ? '#22c55e' : '#16a34a' }}>
+                            <TypingText text={`Strategy generated · ${riskProfile} profile · ${new Date().toLocaleTimeString()}`} />
+                        </span>
+                    </div>
+
+                    {/* All sections in one box */}
+                    <div
+                        className="rounded-xl p-4 mx-2"
+                        style={{
+                            background: isDark ? '#0d111766' : '#f8faff',
+                            border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
+                        }}
+                    >
+                        {sections.map((sec, i) => (
+                            <StrategySection
+                                key={i}
+                                heading={sec.heading}
+                                body={sec.body}
+                                isDark={isDark}
+                                isLast={i === sections.length - 1}
+                                headingColor={getSectionColor(sec.heading, isDark)}
+                            />
                         ))}
                     </div>
-                </div>
 
-                {/* Generate Button */}
-                <button
-                    onClick={handleGetStrategy}
-                    disabled={loading || anchoring}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-[#1a2540] disabled:text-[#8899bb] text-white text-sm font-black py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(247,147,26,0.2)] hover:shadow-[0_10px_20px_rgba(247,147,26,0.4)] disabled:shadow-none hover:-translate-y-0.5 disabled:translate-y-0"
-                >
-                    {loading ? (
-                        <>
-                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            Deep Analyzing Portfolio...
-                        </>
-                    ) : anchoring ? (
-                        <>
-                            <svg className="animate-spin h-5 w-5 text-orange-200" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            Writing to Bitcoin L2...
-                        </>
-                    ) : strategy ? '🔄 Recalculate Strategy' : '🎯 Generate My Strategy'}
-                </button>
-
-                {error && (
-                    <div className="dark:bg-red-900/10 bg-red-50 border dark:border-red-900/30 border-red-200 rounded-xl p-4 flex items-center gap-3">
-                        <span className="text-xl">⚠️</span>
-                        <p className="dark:text-red-400 text-red-600 text-sm font-bold">{error}</p>
-                    </div>
-                )}
-
-                {/* AI Response Card */}
-                {strategy && !loading ? (
-                    <div className="dark:bg-[#0a0e1a]/80 bg-gray-50 border dark:border-[#1e2d4a] border-gray-200 rounded-xl p-5 space-y-4 shadow-inner relative overflow-hidden">
-
-                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-400 to-orange-500"></div>
-
-                        <div className="flex items-center gap-2 mb-2 pb-4 border-b dark:border-[#1e2d4a]/60 border-gray-200 ml-2">
-                            <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-                            <span className="text-green-600 dark:text-green-400 text-xs font-black uppercase tracking-widest font-mono">
-                                Strategy Context: {riskProfile}
+                    {/* Bitcoin anchor badge */}
+                    {anchored && anchorTxId && (
+                        <div
+                            className="rounded-xl px-4 py-3 flex items-center justify-between flex-wrap gap-2 mt-3 mx-2"
+                            style={{
+                                background: '#F7931A0a',
+                                border: '1px solid #F7931A33',
+                            }}
+                        >
+                            <span className="text-xs font-bold" style={{ color: '#F7931A' }}>
+                                ⛓️ Strategy anchored on Bitcoin via Stacks
                             </span>
-                        </div>
-
-                        <div className="ml-2">
-                            <TypewriterText text={strategy} onComplete={() => setTypewriterComplete(true)} />
-                        </div>
-
-                        {typewriterComplete && anchored && anchorTxId && (
-                            <div className="border-t dark:border-[#1e2d4a]/60 border-gray-200 pt-5 mt-5 ml-2 space-y-3 animate-[fade-in_0.5s_ease-in-out]">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs dark:text-orange-400 text-orange-600 font-bold uppercase tracking-wider dark:bg-orange-900/20 bg-orange-100 border dark:border-orange-800/40 border-orange-200 px-3 py-1.5 rounded-md">
-                                        ⛓️ Cryptographically Anchored
-                                    </span>
-                                </div>
-
-                                <a
-                                    href={`https://explorer.hiro.so/txid/${anchorTxId}?chain=testnet`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 hover:text-blue-400 text-xs font-mono font-bold transition-colors block"
-                                >
-                                    Verify Hash On-Chain: {anchorTxId.slice(0, 10)}...{anchorTxId.slice(-6)} ↗
-                                </a>
-                            </div>
-                        )}
-                    </div>
-                ) : !loading && !error && (
-                    <div className="border-2 border-dashed dark:border-[#1e2d4a] border-gray-200 rounded-xl dark:bg-[#0a0e1a]/30 bg-gray-50 flex items-center justify-center p-8 text-center min-h-[180px]">
-                        <p className="dark:text-[#4a5a7a] text-[#8899bb] text-sm font-bold uppercase tracking-wide">Awaiting Profile Selection Context...</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Sidebar History Panel */}
-            <div className="dark:bg-[#0d1117]/60 bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-5 shadow-xl flex flex-col">
-                <div className="border-b dark:border-[#1e2d4a]/60 border-gray-100 pb-3 mb-3">
-                    <h3 className="dark:text-white text-gray-900 font-black text-xl font-creative">Strategy Log</h3>
-                    <p className="dark:text-[#4a5a7a] text-[#8899bb] text-[10px] font-bold mt-1 uppercase tracking-wider">Session Memory</p>
-                </div>
-
-                <div className="flex-grow space-y-4">
-                    {history.length > 0 ? history.map((h, i) => (
-                        <div key={i} className="dark:bg-[#0a0e1a]/50 bg-gray-50 border dark:border-[#1e2d4a] border-gray-200 rounded-lg p-4 hover:border-orange-500/50 transition-colors cursor-pointer relative overflow-hidden group">
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-300 dark:bg-[#1a2540] group-hover:bg-orange-500 transition-colors"></div>
-                            <div className="flex justify-between items-center mb-2 ml-2">
-                                <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded shadow-sm ${RISK_STYLES[h.risk]}`}>
-                                    {h.risk}
-                                </span>
-                                <span className="text-xs dark:text-[#4a5a7a] text-[#8899bb] font-mono font-bold">{h.date}</span>
-                            </div>
-                            <p className="text-xs dark:text-[#8899bb] text-gray-600 line-clamp-3 font-medium ml-2">{h.text.split('\n')[2] || "Aggregated Strategy..."}</p>
-                        </div>
-                    )) : (
-                        <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                            <span className="text-3xl mb-3 opacity-20">📜</span>
-                            <p className="text-xs font-bold dark:text-gray-600 text-[#8899bb] uppercase tracking-widest leading-relaxed">No strategies generated in this session yet.</p>
+                            <a
+                                href={`https://explorer.hiro.so/txid/${anchorTxId}?chain=testnet`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-mono transition-colors"
+                                style={{ color: '#3B82F6' }}
+                            >
+                                {anchorTxId.slice(0, 10)}…{anchorTxId.slice(-6)} ↗
+                            </a>
                         </div>
                     )}
+
                 </div>
-
-                {strategyCount > 0 && (
-                    <div className="mt-6 pt-4 border-t dark:border-[#1e2d4a]/60 border-gray-100">
-                        <div className="w-full text-center p-3 rounded-lg dark:bg-[#0a0e1a] bg-gray-50 border dark:border-[#1e2d4a] border-gray-200">
-                            <p className="text-xs dark:text-[#8899bb] text-[#4a5a7a] font-bold uppercase tracking-wider mb-1">Lifetime Anchored</p>
-                            <p className="text-2xl font-black text-orange-500 font-mono">{strategyCount}</p>
-                        </div>
-                    </div>
-                )}
-
-                {history.length > 1 && (
-                    <button className="w-full mt-4 border-2 dark:border-[#1e2d4a] border-gray-200 dark:text-[#a8b8d8] text-gray-700 hover:border-orange-500 hover:text-orange-500 dark:bg-[#0a0e1a] bg-white font-bold text-sm py-2.5 rounded-lg transition-all shadow-sm">
-                        Compare Strategies
-                    </button>
-                )}
-            </div>
+            )}
         </div>
     );
 }

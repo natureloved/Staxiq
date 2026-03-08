@@ -3,12 +3,12 @@ import { NavLink } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
 const NAV_ITEMS = [
-    { path: '/', label: 'Dashboard', badge: null },
-    { path: '/yield', label: 'Yield Calculator', badge: 'NEW' },
-    { path: '/stacking', label: 'Stacking', badge: 'NEW' },
-    { path: '/health', label: 'Health Score', badge: 'NEW' },
-    { path: '/compare', label: 'Compare', badge: 'NEW' },
-    { path: '/achievements', label: 'Achievements', badge: null },
+    { path: '/', label: 'Dashboard', icon: '📊', badge: null },
+    { path: '/yield', label: 'Yield Calculator', icon: '📈', badge: null },
+    { path: '/stacking', label: 'Stacking', icon: '⚡', badge: null },
+    { path: '/health', label: 'Health Score', icon: '💚', badge: null },
+    { path: '/compare', label: 'Compare', icon: '⚖️', badge: null },
+    { path: '/achievements', label: 'Achievements', icon: '🏆', badge: null },
 ];
 
 export default function Sidebar({ connected, collapsed, setCollapsed }) {
@@ -19,7 +19,7 @@ export default function Sidebar({ connected, collapsed, setCollapsed }) {
             className="flex flex-col transition-all duration-300 flex-shrink-0 z-10"
             style={{
                 width: collapsed ? '64px' : '220px',
-                minHeight: '100vh',
+                minHeight: '100%',
                 background: isDark ? '#0d1117' : '#ffffff',
                 borderRight: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
                 paddingTop: '24px',
@@ -133,7 +133,7 @@ export default function Sidebar({ connected, collapsed, setCollapsed }) {
 
             {!collapsed && (
                 <div
-                    className="mt-auto mx-2 mb-4 p-3 rounded-xl"
+                    className="mt-6 mx-2 mb-4 p-3 rounded-xl"
                     style={{
                         background: isDark ? '#141c2e' : '#f1f5ff',
                         border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
@@ -163,5 +163,38 @@ export default function Sidebar({ connected, collapsed, setCollapsed }) {
                 </div>
             )}
         </aside>
+    );
+}
+
+// Mobile bottom navigation — shown only on small screens (hidden on md+)
+export function MobileNav() {
+    const { isDark } = useTheme();
+
+    return (
+        <nav
+            className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden"
+            style={{
+                background: isDark ? '#0d1117' : '#ffffff',
+                borderTop: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
+                paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
+        >
+            {NAV_ITEMS.map(item => (
+                <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.path === '/'}
+                    className="flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors"
+                    style={({ isActive }) => ({
+                        color: isActive ? '#F7931A' : isDark ? '#4a5a7a' : '#8899bb',
+                    })}
+                >
+                    <span style={{ fontSize: 18 }}>{item.icon}</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em' }}>
+                        {item.label.split(' ')[0]}
+                    </span>
+                </NavLink>
+            ))}
+        </nav>
     );
 }

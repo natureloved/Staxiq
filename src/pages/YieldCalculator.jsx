@@ -5,15 +5,7 @@ import {
     Tooltip, ResponsiveContainer
 } from 'recharts';
 
-const PROTOCOLS = [
-    { name: 'Zest Protocol', apy: 8.2, risk: 'Low', type: 'Lending', asset: 'sBTC' },
-    { name: 'StackingDAO', apy: 9.5, risk: 'Low', type: 'Stacking', asset: 'STX' },
-    { name: 'Bitflow', apy: 12.4, risk: 'Medium', type: 'DEX', asset: 'sBTC' },
-    { name: 'ALEX Lab', apy: 15.1, risk: 'Medium', type: 'DEX', asset: 'STX' },
-    { name: 'Hermetica', apy: 18.7, risk: 'High', type: 'Yield', asset: 'sBTC' },
-    { name: 'Granite', apy: 7.8, risk: 'Low', type: 'Lending', asset: 'sBTC' },
-    { name: 'Velar', apy: 11.3, risk: 'Medium', type: 'DEX', asset: 'STX' },
-];
+import { useProtocolData } from '../hooks/useProtocolData';
 
 const RISK_COLORS = {
     Low: { color: '#22c55e', bg: '#22c55e22', border: '#22c55e44' },
@@ -67,7 +59,14 @@ export default function YieldCalculator({ connected }) {
     const { isDark } = useTheme();
     const [amount, setAmount] = useState('1000');
     const [asset, setAsset] = useState('STX');
-    const [selectedProtocol, setSelectedProtocol] = useState(PROTOCOLS[1]);
+    const { protocols: PROTOCOLS, loading } = useProtocolData();
+    const [selectedProtocol, setSelectedProtocol] = useState(null);
+
+    React.useEffect(() => {
+        if (PROTOCOLS.length && !selectedProtocol) {
+            setSelectedProtocol(PROTOCOLS[1] ?? PROTOCOLS[0]);
+        }
+    }, [PROTOCOLS]);
     const [compound, setCompound] = useState(true);
     const [stxPrice] = useState(0.26);
     const [btcPrice] = useState(68000);
@@ -78,23 +77,24 @@ export default function YieldCalculator({ connected }) {
     }, [amount, asset, stxPrice, btcPrice]);
 
     const returns = useMemo(() =>
-        calcReturns(usdAmount, selectedProtocol.apy, compound),
+        selectedProtocol ? calcReturns(usdAmount, selectedProtocol.apy, compound) : { daily: 0, weekly: 0, monthly: 0, yearly: 0 },
         [usdAmount, selectedProtocol, compound]
     );
 
     const curve = useMemo(() =>
-        generateCurve(usdAmount, selectedProtocol.apy),
+        selectedProtocol ? generateCurve(usdAmount, selectedProtocol.apy) : [],
         [usdAmount, selectedProtocol]
     );
 
     const breakEvenMonths = useMemo(() => {
+        if (!selectedProtocol) return 0;
         // Time to grow 10% from initial
         return Math.ceil(
             Math.log(1.1) / Math.log(1 + selectedProtocol.apy / 100 / 12)
         );
     }, [selectedProtocol]);
 
-    const risk = RISK_COLORS[selectedProtocol.risk];
+    const risk = selectedProtocol ? RISK_COLORS[selectedProtocol.risk] : RISK_COLORS.Medium;
 
     const s = (val) => ({
         bg: isDark ? '#0d1117' : '#ffffff',
@@ -114,7 +114,7 @@ export default function YieldCalculator({ connected }) {
                     className="font-display font-bold text-3xl mb-1 flex items-center gap-2"
                     style={{ color: s('text') }}
                 >
-                    <span className="text-2xl">🖩</span> Yield Calculator
+                    Yield Calculator
                 </h1>
                 <p style={{ color: s('muted'), fontSize: 14 }}>
                     Simulate your returns across every Stacks DeFi protocol before committing funds.
@@ -129,8 +129,8 @@ export default function YieldCalculator({ connected }) {
                     style={{ background: s('bg'), border: `1px solid ${s('border')}` }}
                 >
                     <h2
-                        className="font-display font-bold text-lg"
-                        style={{ color: s('text') }}
+                        className="font-bold text-lg"
+                        style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
                     >
                         Configure Investment
                     </h2>
@@ -202,15 +202,21 @@ export default function YieldCalculator({ connected }) {
                                     className="flex items-center justify-between px-4 py-3 rounded-xl
                     transition-all duration-200 text-left"
                                     style={{
-                                        background: selectedProtocol.name === p.name
+                                        background: selectedProtocol?.name === p.name
                                             ? 'linear-gradient(135deg, #F7931A15, #F7931A08)'
                                             : s('card'),
-                                        border: `1px solid ${selectedProtocol.name === p.name
+                                        border: `1px solid ${selectedProtocol?.name === p.name
                                             ? '#F7931A55'
                                             : s('border')}`,
                                     }}
                                 >
                                     <div className="flex items-center gap-3">
+                                        <img
+                                            src={p.logo}
+                                            alt={p.name}
+                                            className="w-6 h-6 rounded-full object-cover"
+                                            onError={e => { e.target.style.display = 'none'; }}
+                                        />
                                         <span
                                             className="text-xs font-bold px-2 py-0.5 rounded-full"
                                             style={{
@@ -219,7 +225,7 @@ export default function YieldCalculator({ connected }) {
                                                 border: `1px solid ${RISK_COLORS[p.risk].border}`,
                                             }}
                                         >
-                                            {p.risk}
+                                            {p.risk.toUpperCase()}
                                         </span>
                                         <span
                                             className="text-sm font-semibold"
@@ -232,7 +238,7 @@ export default function YieldCalculator({ connected }) {
                                         className="font-mono font-black text-sm"
                                         style={{ color: '#F7931A' }}
                                     >
-                                        {p.apy}%
+                                        {p.apy ? `${p.apy}%` : '—'}
                                     </span>
                                 </button>
                             ))}
@@ -275,155 +281,159 @@ export default function YieldCalculator({ connected }) {
                 {/* RIGHT — Results Panel */}
                 <div className="space-y-4">
 
-                    {/* Selected protocol summary */}
-                    <div
-                        className="rounded-2xl p-5"
-                        style={{
-                            background: 'linear-gradient(135deg, #F7931A15, #F7931A05)',
-                            border: '1px solid #F7931A33',
-                        }}
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <p
-                                    className="font-display font-black text-2xl"
-                                    style={{ color: '#F7931A' }}
-                                >
-                                    {selectedProtocol.apy}% APY
-                                </p>
-                                <p
-                                    className="text-sm font-semibold"
-                                    style={{ color: s('muted') }}
-                                >
-                                    {selectedProtocol.name} · {selectedProtocol.type}
-                                </p>
-                            </div>
+                    {selectedProtocol && (
+                        <>
+                            {/* Selected protocol summary */}
                             <div
-                                className="px-3 py-1.5 rounded-full text-xs font-black"
+                                className="rounded-2xl p-5"
                                 style={{
-                                    background: risk.bg,
-                                    color: risk.color,
-                                    border: `1px solid ${risk.border}`,
+                                    background: 'linear-gradient(135deg, #F7931A15, #F7931A05)',
+                                    border: '1px solid #F7931A33',
                                 }}
                             >
-                                {selectedProtocol.risk} Risk
-                            </div>
-                        </div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p
+                                            className="font-display font-black text-2xl"
+                                            style={{ color: '#F7931A' }}
+                                        >
+                                            {selectedProtocol.apy}% APY
+                                        </p>
+                                        <p
+                                            className="text-sm font-semibold"
+                                            style={{ color: s('muted') }}
+                                        >
+                                            {selectedProtocol.name} · {selectedProtocol.type}
+                                        </p>
+                                    </div>
+                                    <div
+                                        className="px-3 py-1.5 rounded-full text-xs font-black"
+                                        style={{
+                                            background: risk.bg,
+                                            color: risk.color,
+                                            border: `1px solid ${risk.border}`,
+                                        }}
+                                    >
+                                        {selectedProtocol.risk} Risk
+                                    </div>
+                                </div>
 
-                        {/* Return grid */}
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                { label: 'Daily', value: returns.daily },
-                                { label: 'Weekly', value: returns.weekly },
-                                { label: 'Monthly', value: returns.monthly },
-                                { label: 'Yearly', value: returns.yearly },
-                            ].map(({ label, value }) => (
+                                {/* Return grid */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    {[
+                                        { label: 'Daily', value: returns.daily },
+                                        { label: 'Weekly', value: returns.weekly },
+                                        { label: 'Monthly', value: returns.monthly },
+                                        { label: 'Yearly', value: returns.yearly },
+                                    ].map(({ label, value }) => (
+                                        <div
+                                            key={label}
+                                            className="rounded-xl p-3"
+                                            style={{
+                                                background: isDark ? '#141c2e' : '#ffffff',
+                                                border: `1px solid ${s('border')}`,
+                                            }}
+                                        >
+                                            <p
+                                                className="text-xs font-bold uppercase tracking-widest mb-1"
+                                                style={{ color: s('dim') }}
+                                            >
+                                                {label}
+                                            </p>
+                                            <p
+                                                className="font-mono font-black text-lg"
+                                                style={{ color: '#22c55e' }}
+                                            >
+                                                +${value.toFixed(2)}
+                                            </p>
+                                            <p
+                                                className="text-xs font-mono"
+                                                style={{ color: s('dim') }}
+                                            >
+                                                {asset === 'STX'
+                                                    ? `${(value / stxPrice).toFixed(2)} STX`
+                                                    : `${(value / btcPrice).toFixed(6)} BTC`}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Break-even */}
+                            <div
+                                className="rounded-2xl p-4 flex items-center gap-4"
+                                style={{
+                                    background: isDark ? '#0d1117' : '#ffffff',
+                                    border: `1px solid ${s('border')}`,
+                                }}
+                            >
                                 <div
-                                    key={label}
-                                    className="rounded-xl p-3"
-                                    style={{
-                                        background: isDark ? '#141c2e' : '#ffffff',
-                                        border: `1px solid ${s('border')}`,
-                                    }}
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                                    style={{ background: '#3B82F622', border: '1px solid #3B82F633' }}
                                 >
+                                    ⏱️
+                                </div>
+                                <div>
                                     <p
-                                        className="text-xs font-bold uppercase tracking-widest mb-1"
-                                        style={{ color: s('dim') }}
+                                        className="text-sm font-bold"
+                                        style={{ color: s('text') }}
                                     >
-                                        {label}
+                                        Break-even in ~{breakEvenMonths} months
                                     </p>
                                     <p
-                                        className="font-mono font-black text-lg"
-                                        style={{ color: '#22c55e' }}
-                                    >
-                                        +${value.toFixed(2)}
-                                    </p>
-                                    <p
-                                        className="text-xs font-mono"
+                                        className="text-xs"
                                         style={{ color: s('dim') }}
                                     >
-                                        {asset === 'STX'
-                                            ? `${(value / stxPrice).toFixed(2)} STX`
-                                            : `${(value / btcPrice).toFixed(6)} BTC`}
+                                        Time to grow your investment by 10% at {selectedProtocol.apy}% APY
                                     </p>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
+                            </div>
 
-                    {/* Break-even */}
-                    <div
-                        className="rounded-2xl p-4 flex items-center gap-4"
-                        style={{
-                            background: isDark ? '#0d1117' : '#ffffff',
-                            border: `1px solid ${s('border')}`,
-                        }}
-                    >
-                        <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                            style={{ background: '#3B82F622', border: '1px solid #3B82F633' }}
-                        >
-                            ⏱️
-                        </div>
-                        <div>
-                            <p
-                                className="text-sm font-bold"
-                                style={{ color: s('text') }}
+                            {/* Compound growth chart */}
+                            <div
+                                className="rounded-2xl p-5"
+                                style={{
+                                    background: isDark ? '#0d1117' : '#ffffff',
+                                    border: `1px solid ${s('border')}`,
+                                }}
                             >
-                                Break-even in ~{breakEvenMonths} months
-                            </p>
-                            <p
-                                className="text-xs"
-                                style={{ color: s('dim') }}
-                            >
-                                Time to grow your investment by 10% at {selectedProtocol.apy}% APY
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Compound growth chart */}
-                    <div
-                        className="rounded-2xl p-5"
-                        style={{
-                            background: isDark ? '#0d1117' : '#ffffff',
-                            border: `1px solid ${s('border')}`,
-                        }}
-                    >
-                        <p
-                            className="font-display font-bold text-sm mb-4"
-                            style={{ color: s('text') }}
-                        >
-                            12-Month Compound Growth
-                        </p>
-                        <ResponsiveContainer width="100%" height={140}>
-                            <AreaChart data={curve}>
-                                <defs>
-                                    <linearGradient id="yieldGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#F7931A" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#F7931A" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <XAxis
-                                    dataKey="month"
-                                    tick={{ fill: s('dim'), fontSize: 10 }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                    interval={2}
-                                />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip isDark={isDark} />} />
-                                <Area
-                                    type="monotone"
-                                    dataKey="value"
-                                    stroke="#F7931A"
-                                    strokeWidth={2}
-                                    fill="url(#yieldGrad)"
-                                    dot={false}
-                                    activeDot={{ r: 4, fill: '#F7931A', strokeWidth: 0 }}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
+                                <p
+                                    className="font-bold text-sm mb-4"
+                                    style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
+                                >
+                                    12-Month Compound Growth
+                                </p>
+                                <ResponsiveContainer width="100%" height={140}>
+                                    <AreaChart data={curve}>
+                                        <defs>
+                                            <linearGradient id="yieldGrad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#F7931A" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#F7931A" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <XAxis
+                                            dataKey="month"
+                                            tick={{ fill: s('dim'), fontSize: 10 }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                            interval={2}
+                                        />
+                                        <YAxis hide />
+                                        <Tooltip content={<CustomTooltip isDark={isDark} />} />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke="#F7931A"
+                                            strokeWidth={2}
+                                            fill="url(#yieldGrad)"
+                                            dot={false}
+                                            activeDot={{ r: 4, fill: '#F7931A', strokeWidth: 0 }}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

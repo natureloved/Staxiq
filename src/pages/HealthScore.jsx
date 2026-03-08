@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { usePortfolio } from '../hooks/usePortfolio';
+import { useDemo } from '../context/DemoContext';
+import { DEMO_HEALTH } from '../data/demoData';
 
 function calcHealthScore({ stxBalance, sbtcBalance, totalUSD, txCount }) {
     let score = 0;
@@ -101,18 +103,22 @@ function ScoreRing({ score, isDark }) {
 
 export default function HealthScore({ connected, address }) {
     const { isDark } = useTheme();
-    const { stxBalance, sbtcBalance, totalUSD, txCount } = usePortfolio(address);
+    const { isDemoMode } = useDemo();
+    const showData = connected || isDemoMode;
+    const livePortfolio = usePortfolio(isDemoMode ? null : address);
     const [animatedScore, setAnimatedScore] = useState(0);
 
-    const { score, issues, wins } = calcHealthScore({
-        stxBalance: stxBalance || '0',
-        sbtcBalance: sbtcBalance || '0',
-        totalUSD: totalUSD || 0,
-        txCount: txCount || 0,
-    });
+    const { score, issues, wins } = isDemoMode
+        ? DEMO_HEALTH
+        : calcHealthScore({
+            stxBalance: livePortfolio.stxBalance || '0',
+            sbtcBalance: livePortfolio.sbtcBalance || '0',
+            totalUSD: livePortfolio.totalUSD || 0,
+            txCount: livePortfolio.txCount || 0,
+        });
 
     useEffect(() => {
-        if (!connected) return;
+        if (!showData) return;
         const timer = setTimeout(() => {
             let current = 0;
             const interval = setInterval(() => {
@@ -123,7 +129,7 @@ export default function HealthScore({ connected, address }) {
             return () => clearInterval(interval);
         }, 300);
         return () => clearTimeout(timer);
-    }, [connected, score]);
+    }, [showData, score]);
 
     const s = (val) => ({
         bg: isDark ? '#0d1117' : '#ffffff',
@@ -134,12 +140,12 @@ export default function HealthScore({ connected, address }) {
         dim: isDark ? '#4a5a7a' : '#8899bb',
     })[val];
 
-    if (!connected) {
+    if (!showData) {
         return (
             <div className="max-w-4xl mx-auto">
                 <h1 className="font-display font-bold text-3xl mb-2"
                     style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}>
-                    💊 Wallet Health Score
+                    Wallet Health Score
                 </h1>
                 <div
                     className="rounded-2xl p-12 text-center mt-6"
@@ -166,7 +172,7 @@ export default function HealthScore({ connected, address }) {
                     className="font-display font-bold text-3xl mb-1"
                     style={{ color: s('text') }}
                 >
-                    💊 Wallet Health Score
+                    Wallet Health Score
                 </h1>
                 <p style={{ color: s('muted'), fontSize: 14 }}>
                     Your Bitcoin DeFi portfolio rating across diversification, risk and yield opportunity.

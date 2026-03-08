@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { usePortfolio } from '../hooks/usePortfolio';
+import { useDemo } from '../context/DemoContext';
+import { DEMO_STACKING } from '../data/demoData';
 
 const CYCLE_DURATION_DAYS = 14;
 const STX_PRICE = 0.26;
@@ -15,11 +17,26 @@ function getNextCycleDate() {
 
 export default function StackingTracker({ connected, address }) {
     const { isDark } = useTheme();
-    const { stxBalance } = usePortfolio(address);
-    const stackedAmount = parseFloat(stxBalance) || 0;
-    const [cyclesCompleted] = useState(3);
-    const [totalBtcEarned] = useState(0.00012);
-    const [currentCycleProgress] = useState(68);
+    const { isDemoMode } = useDemo();
+    const showData = connected || isDemoMode;
+    const { stxBalance } = usePortfolio(isDemoMode ? null : address);
+
+    const d = isDemoMode ? DEMO_STACKING : {
+        stackedSTX: parseFloat(stxBalance) || 0,
+        totalSTXEarned: parseFloat(((parseFloat(stxBalance) || 0) * 0.095 * (3 / 26)).toFixed(2)),
+        totalBTCEarned: 0.00012,
+        cyclesCompleted: 3,
+        currentCycle: 4,
+        cycleProgress: 68,
+        nextPayoutDays: 6,
+        nextPayoutSTX: parseFloat(((parseFloat(stxBalance) || 0) * 0.095 / 26).toFixed(4)),
+        nextPayoutDate: getNextCycleDate(),
+        earnings: [
+            { cycle: 3, stxEarned: 5.97, btcValue: 0.000040, date: 'Feb 11', status: 'Paid' },
+            { cycle: 2, stxEarned: 6.14, btcValue: 0.000041, date: 'Jan 28', status: 'Paid' },
+            { cycle: 1, stxEarned: 5.82, btcValue: 0.000039, date: 'Jan 14', status: 'Paid' },
+        ],
+    };
 
     const s = (val) => ({
         bg: isDark ? '#0d1117' : '#ffffff',
@@ -30,22 +47,19 @@ export default function StackingTracker({ connected, address }) {
         dim: isDark ? '#4a5a7a' : '#8899bb',
     })[val];
 
-    const estimatedNextPayout = (stackedAmount * 0.095 / 26).toFixed(4);
-    const totalSTXEarned = (stackedAmount * 0.095 * (cyclesCompleted / 26)).toFixed(2);
-
     const stats = [
-        { label: 'Stacked STX', value: stackedAmount.toLocaleString(), unit: 'STX', color: '#F7931A', icon: '🥩' },
-        { label: 'Total STX Earned', value: totalSTXEarned, unit: 'STX', color: '#22c55e', icon: '💰' },
-        { label: 'Total BTC Earned', value: totalBtcEarned, unit: 'BTC', color: '#F7931A', icon: '₿' },
-        { label: 'Cycles Completed', value: cyclesCompleted, unit: 'cycles', color: '#3B82F6', icon: '🔄' },
+        { label: 'Stacked STX', value: d.stackedSTX.toLocaleString(), unit: 'STX', color: '#F7931A', icon: '' },
+        { label: 'Total STX Earned', value: d.totalSTXEarned, unit: 'STX', color: '#22c55e', icon: '' },
+        { label: 'Total BTC Earned', value: d.totalBTCEarned, unit: 'BTC', color: '#F7931A', icon: '' },
+        { label: 'Cycles Completed', value: d.cyclesCompleted, unit: 'cycles', color: '#3B82F6', icon: '' },
     ];
 
-    if (!connected) {
+    if (!showData) {
         return (
             <div className="max-w-4xl mx-auto">
                 <h1 className="font-display font-bold text-3xl mb-2"
                     style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}>
-                    🥩 Stacking Tracker
+                    Stacking Tracker
                 </h1>
                 <div
                     className="rounded-2xl p-12 text-center mt-6"
@@ -72,7 +86,7 @@ export default function StackingTracker({ connected, address }) {
                     className="font-display font-bold text-3xl mb-1"
                     style={{ color: s('text') }}
                 >
-                    🥩 Stacking Tracker
+                    Stacking Tracker
                 </h1>
                 <p style={{ color: s('muted'), fontSize: 14 }}>
                     Live STX stacking rewards via StackingDAO · Bitcoin-secured yields
@@ -88,7 +102,7 @@ export default function StackingTracker({ connected, address }) {
                         style={{ background: s('bg'), border: `1px solid ${s('border')}` }}
                     >
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xl">{stat.icon}</span>
+                            {stat.icon && <span className="text-xl">{stat.icon}</span>}
                             <span
                                 className="text-xs font-bold uppercase tracking-widest"
                                 style={{ color: s('dim') }}
@@ -134,7 +148,7 @@ export default function StackingTracker({ connected, address }) {
                         <div
                             className="h-full rounded-full transition-all duration-700"
                             style={{
-                                width: `${currentCycleProgress}%`,
+                                width: `${d.cycleProgress}%`,
                                 background: 'linear-gradient(90deg, #F7931A, #3B82F6)',
                             }}
                         />
@@ -145,13 +159,13 @@ export default function StackingTracker({ connected, address }) {
                             className="text-sm font-semibold"
                             style={{ color: s('muted') }}
                         >
-                            {currentCycleProgress}% complete
+                            {d.cycleProgress}% complete
                         </span>
                         <span
                             className="text-sm font-semibold"
                             style={{ color: s('dim') }}
                         >
-                            Cycle #{cyclesCompleted + 1}
+                            Cycle #{d.currentCycle}
                         </span>
                     </div>
 
@@ -175,13 +189,13 @@ export default function StackingTracker({ connected, address }) {
                                 className="font-mono font-black text-xl"
                                 style={{ color: s('text') }}
                             >
-                                {estimatedNextPayout} STX
+                                {d.nextPayoutSTX} STX
                             </p>
                             <p
                                 className="text-xs mt-0.5"
                                 style={{ color: s('dim') }}
                             >
-                                ≈ ${(parseFloat(estimatedNextPayout) * STX_PRICE).toFixed(2)} USD · {getNextCycleDate()}
+                                ≈ ${(parseFloat(d.nextPayoutSTX) * STX_PRICE).toFixed(2)} USD · {d.nextPayoutDate}
                             </p>
                         </div>
                     </div>
@@ -200,28 +214,21 @@ export default function StackingTracker({ connected, address }) {
                     </h2>
 
                     <div className="space-y-3">
-                        {[
-                            { cycle: 'Cycle #1', stx: '5.82', btc: '0.000039', date: 'Jan 14' },
-                            { cycle: 'Cycle #2', stx: '6.14', btc: '0.000041', date: 'Jan 28' },
-                            { cycle: 'Cycle #3', stx: '5.97', btc: '0.000040', date: 'Feb 11' },
-                            { cycle: 'Current', stx: '—', btc: '—', date: 'In progress', active: true },
-                        ].map((row, i) => (
+                        {d.earnings.map((row, i) => (
                             <div
                                 key={i}
                                 className="flex items-center justify-between py-3 rounded-xl px-4"
                                 style={{
-                                    background: row.active
-                                        ? 'linear-gradient(135deg, #3B82F615, #3B82F605)'
-                                        : s('card'),
-                                    border: `1px solid ${row.active ? '#3B82F633' : s('border')}`,
+                                    background: s('card'),
+                                    border: `1px solid ${s('border')}`,
                                 }}
                             >
                                 <div>
                                     <p
                                         className="text-sm font-bold"
-                                        style={{ color: row.active ? '#3B82F6' : s('text') }}
+                                        style={{ color: s('text') }}
                                     >
-                                        {row.cycle}
+                                        Cycle #{row.cycle}
                                     </p>
                                     <p
                                         className="text-xs"
@@ -235,13 +242,13 @@ export default function StackingTracker({ connected, address }) {
                                         className="font-mono font-bold text-sm"
                                         style={{ color: '#22c55e' }}
                                     >
-                                        {row.stx !== '—' ? `+${row.stx} STX` : '—'}
+                                        +{row.stxEarned} STX
                                     </p>
                                     <p
                                         className="font-mono text-xs"
                                         style={{ color: '#F7931A' }}
                                     >
-                                        {row.btc !== '—' ? `+${row.btc} BTC` : 'Pending'}
+                                        +{row.btcValue} BTC
                                     </p>
                                 </div>
                             </div>
@@ -300,7 +307,7 @@ export default function StackingTracker({ connected, address }) {
                     href="https://stackingdao.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-6 py-3 rounded-xl font-bold text-white text-sm transition-all hover:scale-[1.02]"
+                    className="px-4 py-2 rounded-xl font-bold text-white text-sm transition-all hover:scale-[1.02] whitespace-nowrap"
                     style={{
                         background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
                         boxShadow: '0 4px 14px #3B82F633',
