@@ -78,7 +78,9 @@ export const PROTOCOL_META = [
         url: 'https://hermetica.fi',
         logo: '/logos/hermetica.png',
         color: '#8b5cf6',
-        fallbackApy: 20.0,   // published: 20-25% APY on USDh
+        fallbackApy: 20.0,
+        fallbackTvlRaw: 9_800_000,
+        fallbackTvl: '$9.8M',
     },
     {
         id: 'velar',
@@ -93,6 +95,8 @@ export const PROTOCOL_META = [
         logo: '/logos/velar.png',
         color: '#ec4899',
         fallbackApy: 18.5,
+        fallbackTvlRaw: 431_000,
+        fallbackTvl: '$431K',
     },
     {
         id: 'granite',
@@ -161,13 +165,14 @@ export async function fetchAllProtocolData() {
                 console.warn(`[defiLlama] fetch failed for ${meta.slug}:`, e.message);
             }
 
-            // If DefiLlama has no APY for this protocol, use our researched fallback
             const apy = fetched.apy ?? meta.fallbackApy ?? null;
+            const tvlRaw = fetched.tvlRaw ?? meta.fallbackTvlRaw ?? null;
+            const tvl = fetched.tvlRaw ? fetched.tvl : (meta.fallbackTvl ?? '—');
 
             return {
                 ...meta,
-                tvlRaw: fetched.tvlRaw,
-                tvl: fetched.tvl,
+                tvlRaw,
+                tvl,
                 apy,
                 apyDisplay: apy != null ? `${apy}%` : '—',
                 apySource: fetched.apy != null ? 'live' : 'fallback',

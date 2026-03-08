@@ -77,54 +77,54 @@ export default function Overview({ connected, address }) {
             {/* Portfolio Metric Cards */}
             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 font-sans">
 
-                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border border-gray-200 rounded-2xl p-4 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(247,147,26,0.03)] hover:shadow-[0_8px_30px_rgba(247,147,26,0.15)] transition-shadow duration-300">
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border border-gray-200 rounded-2xl p-4 flex flex-col justify-center items-center sm:items-start relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(247,147,26,0.03)] hover:shadow-[0_8px_30px_rgba(247,147,26,0.15)] transition-shadow duration-300">
                     <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-orange-500 shadow-[0_0_10px_rgba(247,147,26,0.8)]"></div>
-                    <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-2 uppercase tracking-widest ml-3">STX Balance</p>
+                    <p className="text-xs sm:text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-1 sm:mb-2 uppercase tracking-widest sm:ml-3">STX Balance</p>
                     {displayData.loading ? (
-                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-24 rounded mt-1 ml-3"></div>
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-24 rounded mt-1 sm:ml-3"></div>
                     ) : (
-                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
-                            {animatedStx}
-                            <span className="text-xl dark:text-[#4a5a7a] text-[#8899bb] font-bold ml-2 tracking-normal">STX</span>
+                        <p className="text-2xl sm:text-4xl font-black dark:text-white text-gray-900 sm:ml-3 font-mono">
+                            {parseFloat(animatedStx)}
+                            <span className="text-base sm:text-xl dark:text-[#4a5a7a] text-[#8899bb] font-bold ml-1 sm:ml-2 tracking-normal">STX</span>
                         </p>
                     )}
                 </div>
 
-                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col justify-center items-center sm:items-start relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
                     <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-orange-400"></div>
-                    <div className="flex items-center gap-2 mb-2 ml-3">
-                        <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold uppercase tracking-widest">sBTC Balance</p>
+                    <div className="flex items-center gap-2 mb-1 sm:mb-2 sm:ml-3">
+                        <p className="text-xs sm:text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold uppercase tracking-widest">sBTC Balance</p>
                     </div>
                     {displayData.loading ? (
-                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-24 rounded mt-1 ml-3"></div>
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-24 rounded mt-1 sm:ml-3"></div>
                     ) : (
-                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
+                        <p className="text-2xl sm:text-4xl font-black dark:text-white text-gray-900 sm:ml-3 font-mono">
                             {animatedSbtc}
-                            <span className="text-xl dark:text-[#4a5a7a] text-[#8899bb] font-bold ml-2 tracking-normal">sBTC</span>
+                            <span className="text-base sm:text-xl dark:text-[#4a5a7a] text-[#8899bb] font-bold ml-1 sm:ml-2 tracking-normal">sBTC</span>
                         </p>
                     )}
                 </div>
 
-                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col justify-center items-center sm:items-start relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
                     <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]"></div>
-                    <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-2 uppercase tracking-widest ml-3">Total Value</p>
+                    <p className="text-xs sm:text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-1 sm:mb-2 uppercase tracking-widest sm:ml-3">Total Value</p>
                     {displayData.loading ? (
-                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-32 rounded mt-1 ml-3"></div>
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-32 rounded mt-1 sm:ml-3"></div>
                     ) : (
-                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
-                            <span className="text-green-500 mr-1">$</span>
+                        <p className="text-2xl sm:text-4xl font-black dark:text-white text-gray-900 sm:ml-3 font-mono">
+                            <span className="text-green-500 mr-0.5 sm:mr-1">$</span>
                             {animatedUsd}
                         </p>
                     )}
                 </div>
 
-                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
+                <div className="dark:bg-[#0d1117]/60 bg-white dark:border-[#1e2d4a] border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col justify-center items-center sm:items-start relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-xl transition-shadow duration-300">
                     <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
-                    <p className="text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-2 uppercase tracking-widest ml-3">Transactions</p>
+                    <p className="text-xs sm:text-sm dark:text-[#8899bb] text-[#4a5a7a] font-bold mb-1 sm:mb-2 uppercase tracking-widest sm:ml-3">Transactions</p>
                     {displayData.loading ? (
-                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-16 rounded mt-1 ml-3"></div>
+                        <div className="animate-pulse dark:bg-[#141c2e] bg-gray-200 h-8 w-16 rounded mt-1 sm:ml-3"></div>
                     ) : (
-                        <p className="text-4xl font-black dark:text-white text-gray-900 ml-3 font-mono">
+                        <p className="text-2xl sm:text-4xl font-black dark:text-white text-gray-900 sm:ml-3 font-mono">
                             {animatedTx}
                         </p>
                     )}

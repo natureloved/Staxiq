@@ -92,7 +92,7 @@ export default function Hero() {
 
                 {/* Stats row */}
                 <div
-                    className="inline-flex flex-wrap items-center justify-center gap-0 rounded-2xl overflow-hidden"
+                    className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl overflow-hidden w-full sm:w-auto sm:inline-grid"
                     style={{
                         background: isDark ? '#141c2e' : '#ffffff',
                         border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
@@ -104,14 +104,13 @@ export default function Hero() {
                         { label: 'Live Protocols', value: '7', color: '#3B82F6' },
                         { label: 'Platform Fees', value: '0%', color: '#22c55e' },
                         { label: 'Network', value: 'Bitcoin L2', color: '#8899bb' },
-                    ].map((stat, i, arr) => (
+                    ].map((stat, i) => (
                         <div
                             key={i}
-                            className="px-6 py-4 text-center"
+                            className="px-5 py-4 text-center"
                             style={{
-                                borderRight: i < arr.length - 1
-                                    ? `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`
-                                    : 'none',
+                                borderRight: (i === 1 || i === 3) ? 'none' : `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
+                                borderBottom: i < 2 ? `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}` : 'none',
                             }}
                         >
                             <div
