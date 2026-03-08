@@ -3,27 +3,35 @@ import { useTheme } from '../context/ThemeContext';
 
 const STEPS = [
     {
-        icon: '₿',
-        title: 'Welcome to Staxiq',
-        subtitle: 'Bitcoin DeFi Intelligence',
-        description: 'The only AI-powered DeFi aggregator built natively on Stacks Bitcoin L2. See all your Bitcoin positions in one place.',
+        tag: 'Your Bitcoin. Your DeFi.',
+        title: 'Everything Bitcoin DeFi, in one place',
+        description: `Staxiq connects to your Stacks wallet and shows you exactly where your STX and sBTC are working across every Bitcoin DeFi protocol — stacking, lending, trading, earning — all on one screen.`,
+        note: 'No signup. No email. Just connect your wallet.',
+        gradient: 'linear-gradient(135deg, #F7931A22, #F7931A05)',
+        borderColor: '#F7931A33',
         cta: 'Get Started',
     },
     {
-        icon: '🔗',
-        title: 'Connect Your Wallet',
-        subtitle: 'Non-custodial & Secure',
-        description: 'Connect Xverse or Leather wallet. Staxiq never holds your funds — we only read your on-chain data to generate personalized strategies.',
+        tag: '100% Non-Custodial',
+        title: 'We read your wallet. We never touch your funds.',
+        description: `Connect your Xverse or Leather wallet in one click. Staxiq only reads your on-chain data — your keys stay with you, your funds stay in your wallet. We can't move, spend, or access anything.`,
+        note: 'Compatible with Xverse and Leather wallets.',
+        gradient: 'linear-gradient(135deg, #3B82F622, #3B82F605)',
+        borderColor: '#3B82F633',
         cta: 'Understood',
     },
     {
-        icon: '🤖',
-        title: 'Meet Your AI Copilot',
-        subtitle: 'Powered by Gemini AI',
-        description: 'Select your risk profile and get instant personalized DeFi strategies across Zest, ALEX, Bitflow, Hermetica and more. Every strategy is anchored on Bitcoin.',
+        tag: 'Powered by Gemini AI',
+        title: 'Your personal Bitcoin DeFi advisor',
+        description: `Tell Staxiq how much risk you're comfortable with. Our AI analyses your actual wallet balance and builds a plain-English strategy — which protocols to use, how much to put where, and exactly what to do first.`,
+        note: 'Every strategy is permanently recorded on the Bitcoin blockchain via Stacks.',
+        gradient: 'linear-gradient(135deg, #22c55e22, #22c55e05)',
+        borderColor: '#22c55e33',
         cta: 'Start Exploring',
     },
 ];
+
+const STEP_ICONS = ['₿', '🔒', '🤖'];
 
 export default function Onboarding({ onComplete }) {
     const { isDark } = useTheme();
@@ -52,8 +60,6 @@ export default function Onboarding({ onComplete }) {
 
     if (!visible) return null;
 
-    const current = STEPS[step];
-
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -65,7 +71,7 @@ export default function Onboarding({ onComplete }) {
             }}
         >
             <div
-                className="relative w-full max-w-md rounded-2xl p-8 text-center"
+                className="relative w-full max-w-md rounded-2xl p-8"
                 style={{
                     background: isDark
                         ? 'linear-gradient(135deg, #141c2e 0%, #0d1117 100%)'
@@ -87,18 +93,6 @@ export default function Onboarding({ onComplete }) {
                     Skip →
                 </button>
 
-                {/* Icon */}
-                <div
-                    className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center text-4xl"
-                    style={{
-                        background: 'linear-gradient(135deg, #F7931A22 0%, #F7931A11 100%)',
-                        border: '1px solid #F7931A33',
-                        boxShadow: '0 0 24px #F7931A22',
-                    }}
-                >
-                    {current.icon}
-                </div>
-
                 {/* Step dots */}
                 <div className="flex items-center justify-center gap-2 mb-6">
                     {STEPS.map((_, i) => (
@@ -116,46 +110,78 @@ export default function Onboarding({ onComplete }) {
                     ))}
                 </div>
 
-                {/* Eyebrow */}
-                <p
-                    className="text-xs font-semibold tracking-widest uppercase mb-2"
-                    style={{ color: '#F7931A' }}
+                {/* Step card */}
+                <div
+                    className="rounded-2xl p-8 text-center"
+                    style={{
+                        background: STEPS[step].gradient,
+                        border: `1px solid ${STEPS[step].borderColor}`,
+                    }}
                 >
-                    {current.subtitle}
-                </p>
+                    {/* Tag line */}
+                    <p
+                        className="text-xs font-black uppercase tracking-widest mb-4"
+                        style={{ color: isDark ? '#8899bb' : '#64748b' }}
+                    >
+                        {STEPS[step].tag}
+                    </p>
 
-                {/* Title */}
-                <h2
-                    className="font-display text-2xl font-bold mb-4"
-                    style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
-                >
-                    {current.title}
-                </h2>
+                    {/* Icon — smaller, 48px */}
+                    <div
+                        className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-2xl mb-5"
+                        style={{
+                            background: STEPS[step].borderColor,
+                            border: `1px solid ${STEPS[step].borderColor}`,
+                        }}
+                    >
+                        {STEP_ICONS[step]}
+                    </div>
 
-                {/* Description */}
-                <p
-                    className="text-sm leading-relaxed mb-8"
-                    style={{ color: isDark ? '#8899bb' : '#334155' }}
-                >
-                    {current.description}
-                </p>
+                    {/* Title */}
+                    <h3
+                        className="font-bold text-xl mb-3 leading-tight"
+                        style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
+                    >
+                        {STEPS[step].title}
+                    </h3>
+
+                    {/* Description */}
+                    <p
+                        className="text-sm leading-relaxed mb-4"
+                        style={{ color: isDark ? '#8899bb' : '#64748b' }}
+                    >
+                        {STEPS[step].description}
+                    </p>
+
+                    {/* Note */}
+                    <p
+                        className="text-xs px-4 py-2 rounded-lg inline-block"
+                        style={{
+                            background: isDark ? '#0d111766' : '#ffffff88',
+                            color: isDark ? '#4a5a7a' : '#94a3b8',
+                            border: `1px solid ${STEPS[step].borderColor}`,
+                        }}
+                    >
+                        {STEPS[step].note}
+                    </p>
+                </div>
 
                 {/* CTA */}
                 <button
                     onClick={handleNext}
-                    className="w-full py-3 rounded-xl font-semibold text-white
+                    className="w-full py-3 rounded-xl font-semibold text-white mt-6
             transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         background: 'linear-gradient(135deg, #F7931A 0%, #e8820a 100%)',
                         boxShadow: '0 4px 15px #F7931A33',
                     }}
                 >
-                    {current.cta} →
+                    {STEPS[step].cta} →
                 </button>
 
                 {/* Counter */}
                 <p
-                    className="text-xs mt-4"
+                    className="text-xs mt-4 text-center"
                     style={{ color: isDark ? '#4a5a7a' : '#8899bb' }}
                 >
                     {step + 1} of {STEPS.length}

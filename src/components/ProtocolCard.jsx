@@ -84,12 +84,20 @@ const ProtocolCard = () => {
 
                                 <div className="flex justify-between items-start mb-3 z-10 relative">
                                     <div className="flex items-center space-x-2.5">
-                                        <img
-                                            src={protocol.logo}
-                                            alt={protocol.name}
-                                            className="w-7 h-7 rounded-lg object-cover"
-                                            onError={e => { e.target.style.display = 'none'; }}
-                                        />
+                                        <div
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
+                                            style={{
+                                                background: isDark ? '#141c2e' : '#f1f5ff',
+                                                border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
+                                            }}
+                                        >
+                                            <img
+                                                src={protocol.logo}
+                                                alt={protocol.name}
+                                                className="w-5 h-5 object-contain"
+                                                onError={e => { e.target.style.display = 'none'; }}
+                                            />
+                                        </div>
                                         <h3 className="font-bold dark:text-[#f0f4ff] text-gray-900 text-base" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{protocol.name}</h3>
                                     </div>
                                     <span
@@ -129,10 +137,15 @@ const ProtocolCard = () => {
                                         href={protocol.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-full flex items-center justify-center py-2 rounded-lg border dark:border-[#1e2d4a] border-gray-200 dark:bg-[#0d1117] bg-gray-50 text-xs font-bold dark:text-[#a8b8d8] text-gray-700 transition-all duration-300 group-hover:border-transparent group-hover:bg-orange-500 group-hover:text-white group-hover:shadow-[0_0_15px_rgba(247,147,26,0.3)] shadow-sm"
+                                        className="w-full flex items-center justify-center py-2.5 rounded-lg text-xs font-bold transition-all duration-300 hover:scale-[1.02]"
+                                        style={{
+                                            background: 'linear-gradient(135deg, #F7931A, #e8820a)',
+                                            color: '#fff',
+                                            boxShadow: '0 4px 12px rgba(247,147,26,0.3)',
+                                        }}
                                     >
                                         <span>View Strategy</span>
-                                        <svg className="w-4 h-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                         </svg>
                                     </a>
