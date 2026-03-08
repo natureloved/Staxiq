@@ -167,6 +167,23 @@ code,
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes gridMove {
   0% {
     transform: translateY(0);

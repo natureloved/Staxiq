@@ -34,7 +34,7 @@ export default function DashboardLayout({ connected, isDemoMode, children }) {
             >
                 <div
                     className="w-full transition-all duration-300"
-                    style={{ maxWidth: ((connected || isDemoMode) && collapsed) ? 'calc(100% - 156px)' : '100%' }}
+                    style={{ maxWidth: ((connected || isDemoMode) && collapsed) ? 'calc(100% - 172px)' : '100%' }}
                 >
                     {children}
                 </div>

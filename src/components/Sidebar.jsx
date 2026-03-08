@@ -1,172 +1,218 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
 const NAV_ITEMS = [
-    { path: '/', label: 'Dashboard', icon: '📊', badge: null },
-    { path: '/yield', label: 'Yield Calculator', icon: '📈', badge: null },
-    { path: '/stacking', label: 'Stacking', icon: '⚡', badge: null },
-    { path: '/health', label: 'Health Score', icon: '💚', badge: null },
-    { path: '/compare', label: 'Compare', icon: '⚖️', badge: null },
-    { path: '/achievements', label: 'Achievements', icon: '🏆', badge: null },
+    { path: '/', label: 'Overview', badge: null },
+    { path: '/yield', label: 'Yield Calculator', badge: 'NEW' },
+    { path: '/stacking', label: 'Stacking Tracker', badge: 'NEW' },
+    { path: '/health', label: 'Health Score', badge: 'NEW' },
+    { path: '/compare', label: 'Compare Protocols', badge: 'NEW' },
+    { path: '/achievements', label: 'Achievements', badge: null },
 ];
 
 export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed }) {
     const { isDark } = useTheme();
 
+    const s = {
+        bg: isDark ? '#0d1117' : '#ffffff',
+        border: isDark ? '#1e2d4a' : '#dde5f5',
+        text: isDark ? '#8899bb' : '#64748b',
+        textActive: '#F7931A',
+        bgActive: isDark ? '#F7931A12' : '#FFF7ED',
+        borderActive: '#F7931A44',
+        dim: isDark ? '#2a3f6a' : '#e2e8f0',
+        mutedBg: isDark ? '#141c2e' : '#f8faff',
+    };
+
     return (
         <aside
-            className="flex flex-col transition-all duration-300 flex-shrink-0 z-10"
             style={{
-                width: collapsed ? '64px' : '220px',
-                minHeight: '100%',
-                background: isDark ? '#0d1117' : '#ffffff',
-                borderRight: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
-                paddingTop: '24px',
+                width: collapsed ? '48px' : '220px',
+                minHeight: '100vh',
+                background: s.bg,
+                borderRight: `1px solid ${s.border}`,
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)',
+                overflow: 'hidden',
+                flexShrink: 0,
+                position: 'relative',
+                zIndex: 10,
             }}
         >
-            {/* Custom Animated Toggle Button */}
+            {/* ── Toggle button ───────────────────────────── */}
             <button
                 onClick={() => setCollapsed(c => !c)}
-                className="mx-auto mb-6 w-8 h-8 rounded-xl flex flex-col items-center justify-center gap-[1.3px] transition-all duration-300 group hover:scale-105 active:scale-95 z-50 overflow-hidden relative"
                 style={{
-                    background: isDark ? 'linear-gradient(135deg, #141c2e, #0d1117)' : 'linear-gradient(135deg, #ffffff, #f1f5ff)',
-                    border: `1px solid ${isDark ? '#2a3f6a' : '#dde5f5'}`,
-                    boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.05)',
+                    margin: '20px auto 24px',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    border: `1px solid ${s.border}`,
+                    background: s.mutedBg,
+                    color: s.text,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    flexShrink: 0,
+                    transition: 'all 0.2s',
                 }}
-                title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+                title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-                {/* Top Line */}
-                <span
-                    className="h-[1.5px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
-                    style={{
-                        background: isDark ? '#a8b8d8' : '#334155',
-                        transform: collapsed ? 'translateY(0) rotate(0deg)' : 'translateY(2.5px) rotate(45deg)',
-                        width: '12px',
-                    }}
-                />
-
-                {/* Middle Line (Drops downward and fades) */}
-                <span
-                    className="h-[1.5px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
-                    style={{
-                        background: isDark ? '#a8b8d8' : '#334155',
-                        opacity: collapsed ? 1 : 0,
-                        transform: collapsed ? 'translateY(0)' : 'translateY(12px) scale(0)',
-                        width: '12px',
-                    }}
-                />
-
-                {/* Bottom Line */}
-                <span
-                    className="h-[1.5px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
-                    style={{
-                        background: isDark ? '#a8b8d8' : '#334155',
-                        transform: collapsed ? 'translateY(0) rotate(0deg)' : 'translateY(-2.5px) rotate(-45deg)',
-                        width: '12px',
-                    }}
-                />
-
-                {/* Hover Glow */}
-                <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl"
-                    style={{
-                        background: 'radial-gradient(circle at center, rgba(247,147,26,0.15) 0%, transparent 70%)'
-                    }}
-                />
+                {collapsed ? '▶' : '◀'}
             </button>
 
-            <nav className="flex flex-col gap-1 px-2">
+            {/* ── Nav items ───────────────────────────────── */}
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '0 6px', flex: 1 }}>
                 {NAV_ITEMS.map(item => (
                     <NavLink
                         key={item.path}
                         to={item.path}
                         end={item.path === '/'}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative"
                         style={({ isActive }) => ({
-                            background: isActive
-                                ? 'linear-gradient(135deg, #F7931A22, #F7931A11)'
-                                : 'transparent',
-                            border: isActive
-                                ? '1px solid #F7931A33'
-                                : '1px solid transparent',
-                            color: isActive
-                                ? '#F7931A'
-                                : isDark ? '#8899bb' : '#334155',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: collapsed ? 'center' : 'flex-start',
+                            gap: '10px',
+                            padding: collapsed ? '14px 0' : '10px 12px',
+                            borderRadius: '10px',
+                            border: `1px solid ${isActive ? s.borderActive : 'transparent'}`,
+                            background: isActive ? s.bgActive : 'transparent',
+                            color: isActive ? s.textActive : s.text,
+                            textDecoration: 'none',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            minHeight: collapsed ? '64px' : 'auto',
                         })}
                     >
-                        {!collapsed && (
-                            <div className="flex items-center justify-between flex-1 min-w-0">
-                                <span className="text-sm font-semibold truncate">
-                                    {item.label}
-                                </span>
-                                {item.badge && (
-                                    <span
-                                        className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
-                                        style={{
-                                            background: 'linear-gradient(135deg, #F7931A, #e8820a)',
-                                            color: 'white',
-                                        }}
-                                    >
-                                        {item.badge}
-                                    </span>
+                        {({ isActive }) => (
+                            <>
+                                {/* Active indicator bar on left */}
+                                {isActive && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        left: 0,
+                                        top: '20%',
+                                        height: '60%',
+                                        width: '3px',
+                                        borderRadius: '0 3px 3px 0',
+                                        background: '#F7931A',
+                                    }} />
                                 )}
-                            </div>
-                        )}
 
-                        {collapsed && (
-                            <div
-                                className="absolute left-14 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
-                                style={{
-                                    background: isDark ? '#141c2e' : '#ffffff',
-                                    border: `1px solid ${isDark ? '#2a3f6a' : '#dde5f5'}`,
-                                    color: isDark ? '#f0f4ff' : '#0a0e1a',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                                }}
-                            >
-                                {item.label}
-                            </div>
+                                {collapsed ? (
+                                    /* ── COLLAPSED: vertical rotated text ── */
+                                    <div style={{
+                                        writingMode: 'vertical-rl',
+                                        textOrientation: 'mixed',
+                                        transform: 'rotate(180deg)',
+                                        fontSize: '10px',
+                                        fontWeight: isActive ? 800 : 600,
+                                        letterSpacing: '0.06em',
+                                        textTransform: 'uppercase',
+                                        color: isActive ? s.textActive : s.text,
+                                        userSelect: 'none',
+                                        lineHeight: 1,
+                                        paddingLeft: '2px',
+                                        whiteSpace: 'nowrap',
+                                    }}>
+                                        {item.label}
+                                    </div>
+                                ) : (
+                                    /* ── EXPANDED: normal horizontal text ── */
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        flex: 1,
+                                        minWidth: 0,
+                                    }}>
+                                        <span style={{
+                                            fontSize: '13px',
+                                            fontWeight: isActive ? 700 : 500,
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                        }}>
+                                            {item.label}
+                                        </span>
+                                        {item.badge && (
+                                            <span style={{
+                                                fontSize: '8px',
+                                                fontWeight: 900,
+                                                padding: '2px 6px',
+                                                borderRadius: '99px',
+                                                background: 'linear-gradient(135deg, #F7931A, #e8820a)',
+                                                color: '#fff',
+                                                letterSpacing: '0.04em',
+                                                flexShrink: 0,
+                                            }}>
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </NavLink>
                 ))}
             </nav>
 
+            {/* ── Bottom wallet status (expanded only) ──── */}
             {!collapsed && (
-                <div
-                    className="mt-6 mx-2 mb-4 p-3 rounded-xl"
-                    style={{
-                        background: isDark ? '#141c2e' : '#f1f5ff',
-                        border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
-                    }}
-                >
-                    <div className="flex items-center gap-2 mb-1">
-                        <span
-                            className="w-1.5 h-1.5 rounded-full"
-                            style={{
-                                background: (connected || isDemoMode) ? (isDemoMode ? '#F7931A' : '#22c55e') : '#4a5a7a',
-                                animation: (connected || isDemoMode) ? 'pulse 2s infinite' : 'none',
-                            }}
-                        />
-                        <span
-                            className="text-xs font-semibold"
-                            style={{ color: isDemoMode ? '#F7931A' : (connected ? '#22c55e' : isDark ? '#4a5a7a' : '#8899bb') }}
-                        >
+                <div style={{
+                    margin: '0 6px 20px',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    background: s.mutedBg,
+                    border: `1px solid ${s.border}`,
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: (connected || isDemoMode) ? (isDemoMode ? '#F7931A' : '#22c55e') : '#4a5a7a',
+                            display: 'inline-block',
+                            animation: (connected || isDemoMode) ? 'pulse 2s infinite' : 'none',
+                            flexShrink: 0,
+                        }} />
+                        <span style={{
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            color: isDemoMode ? '#F7931A' : (connected ? '#22c55e' : s.text),
+                        }}>
                             {isDemoMode ? 'Demo Mode Active' : (connected ? 'Wallet Connected' : 'Not Connected')}
                         </span>
                     </div>
-                    <p
-                        className="text-[10px]"
-                        style={{ color: isDark ? '#4a5a7a' : '#8899bb' }}
-                    >
+                    <p style={{ fontSize: '10px', color: s.dim, margin: 0 }}>
                         {isDemoMode ? 'Previewing with mock data' : (connected ? 'Stacks Testnet' : 'Connect to access all features')}
                     </p>
                 </div>
+            )}
+
+            {/* ── Bottom wallet status (collapsed only) ─── */}
+            {collapsed && (
+                <div style={{
+                    margin: '0 auto 20px',
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: (connected || isDemoMode) ? (isDemoMode ? '#F7931A' : '#22c55e') : '#4a5a7a',
+                    animation: (connected || isDemoMode) ? 'pulse 2s infinite' : 'none',
+                    flexShrink: 0,
+                }} />
             )}
         </aside>
     );
 }
 
-// Mobile bottom navigation — shown only on small screens (hidden on md+)
+/* ── Mobile bottom nav ──────────────────────────────── */
 export function MobileNav() {
     const { isDark } = useTheme();
 
@@ -184,17 +230,40 @@ export function MobileNav() {
                     key={item.path}
                     to={item.path}
                     end={item.path === '/'}
-                    className="flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors"
                     style={({ isActive }) => ({
-                        color: isActive ? '#F7931A' : isDark ? '#4a5a7a' : '#8899bb',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '10px 4px',
+                        textDecoration: 'none',
+                        color: isActive ? '#F7931A' : isDark ? '#4a5a7a' : '#94a3b8',
+                        borderTop: isActive ? '2px solid #F7931A' : '2px solid transparent',
+                        transition: 'all 0.2s',
                     })}
                 >
-                    <span style={{ fontSize: 18 }}>{item.icon}</span>
-                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em' }}>
-                        {item.label.split(' ')[0]}
-                    </span>
+                    {({ isActive }) => (
+                        <span style={{
+                            fontSize: '9px',
+                            fontWeight: isActive ? 800 : 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            textAlign: 'center',
+                            lineHeight: 1.3,
+                        }}>
+                            {/* Split two-word labels onto two lines on mobile */}
+                            {item.label.includes(' ')
+                                ? item.label.split(' ').map((word, i) => (
+                                    <span key={i} style={{ display: 'block' }}>{word}</span>
+                                ))
+                                : item.label
+                            }
+                        </span>
+                    )}
                 </NavLink>
             ))}
         </nav>
     );
 }
+
