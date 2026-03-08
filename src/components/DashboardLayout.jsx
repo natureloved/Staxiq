@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import Sidebar, { MobileNav } from './Sidebar';
 
-export default function DashboardLayout({ connected, children }) {
+export default function DashboardLayout({ connected, isDemoMode, children }) {
     const { isDark } = useTheme();
     const [collapsed, setCollapsed] = useState(false);
 
