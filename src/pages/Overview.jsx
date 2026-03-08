@@ -2,6 +2,7 @@ import React from 'react';
 import ProtocolCard from '../components/ProtocolCard';
 import AICopilot from '../components/AICopilot';
 import PortfolioChart from '../components/PortfolioChart';
+import WalletProtocols from '../components/WalletProtocols';
 import { useCountUp } from '../hooks/useCountUp';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useDemo } from '../context/DemoContext';
@@ -134,6 +135,10 @@ export default function Overview({ connected, address }) {
             <PortfolioChart totalUSD={displayData.totalUSD} />
 
             <ProtocolCard />
+
+            {(connected || isDemoMode) && (
+                <WalletProtocols address={effectiveAddress} />
+            )}
 
             <AICopilot
                 connected={connected || isDemoMode}
