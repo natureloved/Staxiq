@@ -4,10 +4,10 @@ import { useTheme } from '../context/ThemeContext';
 
 const NAV_ITEMS = [
     { path: '/', label: 'Dashboard', badge: null },
-    { path: '/yield', label: 'Yield Calculator', badge: 'NEW' },
-    { path: '/stacking', label: 'Stacking Tracker', badge: 'NEW' },
-    { path: '/health', label: 'Health Score', badge: 'NEW' },
-    { path: '/compare', label: 'Compare Protocols', badge: 'NEW' },
+    { path: '/yield', label: 'Yield Calculator', badge: null },
+    { path: '/stacking', label: 'Stacking Tracker', badge: null },
+    { path: '/health', label: 'Health Score', badge: null },
+    { path: '/compare', label: 'Compare Protocols', badge: null },
     { path: '/achievements', label: 'Achievements', badge: null },
 ];
 
@@ -29,10 +29,10 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
         <aside
             style={{
                 width: collapsed ? '72px' : '240px',
-                height: 'calc(100vh - 100px)',
+                height: 'calc(100vh - 88px)',
                 background: s.bg,
                 backdropFilter: 'blur(16px)',
-                border: `1px solid ${s.border}`,
+                borderRight: `1px solid ${s.border}`,
                 display: 'flex',
                 flexDirection: 'column',
                 transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -40,10 +40,10 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                 flexShrink: 0,
                 position: 'fixed',
                 top: '88px',
-                left: '12px',
+                left: '0',
                 zIndex: 50,
                 boxShadow: isDark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 12px 40px rgba(0,0,0,0.05)',
-                borderRadius: '24px',
+                borderRadius: '0',
             }}
         >
             {/* ── Header / Toggle ───────────────────────────── */}
@@ -197,7 +197,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                                 letterSpacing: '0.05em',
                                 color: isDemoMode ? '#F7931A' : (connected ? '#22c55e' : s.text),
                             }}>
-                                {isDemoMode ? 'Demo Node' : (connected ? 'Wallet Connected' : 'Offline')}
+                                {isDemoMode ? 'Demo Mode' : (connected ? 'Wallet Connected' : 'Offline')}
                             </span>
                         )}
                     </div>
@@ -209,7 +209,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                             lineHeight: 1.4,
                             opacity: 0.8,
                         }}>
-                            {isDemoMode ? 'Global preview mode active' : (connected ? 'Stacks Testnet Alpha' : 'Connect wallet to start')}
+                            {isDemoMode ? 'Demo Mode' : (connected ? 'Stacks Testnet Alpha' : 'Connect wallet to start')}
                         </p>
                     )}
                 </div>
