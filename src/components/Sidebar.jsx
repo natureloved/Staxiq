@@ -15,11 +15,11 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
     const { isDark } = useTheme();
 
     const s = {
-        bg: isDark ? '#0d1117' : '#ffffff',
+        bg: isDark ? 'rgba(13, 17, 23, 0.75)' : 'rgba(255, 255, 255, 0.8)',
         border: isDark ? '#1e2d4a' : '#dde5f5',
         text: isDark ? '#8899bb' : '#64748b',
         textActive: '#F7931A',
-        bgActive: isDark ? '#F7931A12' : '#FFF7ED',
+        bgActive: isDark ? '#F7931A15' : '#FFF7ED',
         borderActive: '#F7931A44',
         dim: isDark ? '#2a3f6a' : '#e2e8f0',
         mutedBg: isDark ? '#141c2e' : '#f8faff',
@@ -28,46 +28,66 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
     return (
         <aside
             style={{
-                width: collapsed ? '48px' : '220px',
-                minHeight: '100vh',
+                width: collapsed ? '72px' : '240px',
+                height: 'calc(100vh - 24px)',
+                margin: '12px',
+                borderRadius: '24px',
                 background: s.bg,
-                borderRight: `1px solid ${s.border}`,
+                backdropFilter: 'blur(16px)',
+                border: `1px solid ${s.border}`,
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 overflow: 'hidden',
                 flexShrink: 0,
-                position: 'relative',
-                zIndex: 10,
+                position: 'sticky',
+                top: '12px',
+                zIndex: 50,
+                boxShadow: isDark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 12px 40px rgba(0,0,0,0.05)',
             }}
         >
-            {/* ── Toggle button ───────────────────────────── */}
-            <button
-                onClick={() => setCollapsed(c => !c)}
-                style={{
-                    margin: '20px auto 24px',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    border: `1px solid ${s.border}`,
-                    background: s.mutedBg,
-                    color: s.text,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    flexShrink: 0,
-                    transition: 'all 0.2s',
-                }}
-                title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-                {collapsed ? '▶' : '◀'}
-            </button>
+            {/* ── Header / Toggle ───────────────────────────── */}
+            <div style={{
+                padding: collapsed ? '20px 0' : '24px 20px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: collapsed ? 'center' : 'space-between',
+            }}>
+                {!collapsed && (
+                    <span style={{
+                        fontSize: '11px',
+                        fontWeight: 900,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.15em',
+                        color: '#F7931A',
+                    }}>
+                        STAXIQ OPS
+                    </span>
+                )}
+                <button
+                    onClick={() => setCollapsed(c => !c)}
+                    style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        border: `1px solid ${s.border}`,
+                        background: s.mutedBg,
+                        color: s.text,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 900,
+                        transition: 'all 0.2s',
+                    }}
+                >
+                    {collapsed ? '▶' : '◀'}
+                </button>
+            </div>
 
             {/* ── Nav items ───────────────────────────────── */}
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '0 6px', flex: 1 }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 12px', flex: 1 }}>
                 {NAV_ITEMS.map(item => (
                     <NavLink
                         key={item.path}
@@ -77,54 +97,41 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: collapsed ? 'center' : 'flex-start',
-                            gap: '10px',
-                            padding: collapsed ? '14px 0' : '10px 12px',
-                            borderRadius: '10px',
+                            gap: '14px',
+                            padding: collapsed ? '0' : '10px 14px',
+                            borderRadius: '14px',
                             border: `1px solid ${isActive ? s.borderActive : 'transparent'}`,
                             background: isActive ? s.bgActive : 'transparent',
                             color: isActive ? s.textActive : s.text,
                             textDecoration: 'none',
                             transition: 'all 0.2s',
+                            minHeight: collapsed ? '48px' : 'auto',
                             position: 'relative',
-                            overflow: 'hidden',
-                            minHeight: collapsed ? '64px' : 'auto',
                         })}
                     >
                         {({ isActive }) => (
                             <>
-                                {/* Active indicator bar on left */}
-                                {isActive && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        left: 0,
-                                        top: '20%',
-                                        height: '60%',
-                                        width: '3px',
-                                        borderRadius: '0 3px 3px 0',
-                                        background: '#F7931A',
-                                    }} />
-                                )}
+                                {/* stylized orb icon from first letter */}
+                                <div style={{
+                                    width: '34px',
+                                    height: '34px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: isActive ? '#F7931A' : s.mutedBg,
+                                    color: isActive ? '#fff' : s.text,
+                                    fontSize: '13px',
+                                    fontWeight: 800,
+                                    flexShrink: 0,
+                                    transition: 'all 0.3s',
+                                    boxShadow: isActive ? '0 0 15px rgba(247,147,26,0.3)' : 'none',
+                                    border: `1px solid ${isActive ? 'transparent' : s.border}`,
+                                }}>
+                                    {item.label[0]}
+                                </div>
 
-                                {collapsed ? (
-                                    /* ── COLLAPSED: vertical rotated text ── */
-                                    <div style={{
-                                        writingMode: 'vertical-rl',
-                                        textOrientation: 'mixed',
-                                        transform: 'rotate(180deg)',
-                                        fontSize: '10px',
-                                        fontWeight: isActive ? 800 : 600,
-                                        letterSpacing: '0.06em',
-                                        textTransform: 'uppercase',
-                                        color: isActive ? s.textActive : s.text,
-                                        userSelect: 'none',
-                                        lineHeight: 1,
-                                        paddingLeft: '2px',
-                                        whiteSpace: 'nowrap',
-                                    }}>
-                                        {item.label}
-                                    </div>
-                                ) : (
-                                    /* ── EXPANDED: normal horizontal text ── */
+                                {!collapsed && (
                                     <div style={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -136,21 +143,18 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                                             fontSize: '13px',
                                             fontWeight: isActive ? 700 : 500,
                                             whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
                                         }}>
                                             {item.label}
                                         </span>
                                         {item.badge && (
                                             <span style={{
-                                                fontSize: '8px',
+                                                fontSize: '7px',
                                                 fontWeight: 900,
-                                                padding: '2px 6px',
-                                                borderRadius: '99px',
-                                                background: 'linear-gradient(135deg, #F7931A, #e8820a)',
+                                                padding: '2px 5px',
+                                                borderRadius: '6px',
+                                                background: '#F7931A',
                                                 color: '#fff',
-                                                letterSpacing: '0.04em',
-                                                flexShrink: 0,
+                                                letterSpacing: '0.05em',
                                             }}>
                                                 {item.badge}
                                             </span>
@@ -163,51 +167,53 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                 ))}
             </nav>
 
-            {/* ── Bottom wallet status (expanded only) ──── */}
-            {!collapsed && (
+            {/* ── Status Section ──────────────────────────── */}
+            <div style={{ padding: '16px 12px 24px' }}>
                 <div style={{
-                    margin: '0 6px 20px',
                     padding: '12px',
-                    borderRadius: '10px',
-                    background: s.mutedBg,
+                    borderRadius: '16px',
+                    background: isDark ? 'rgba(20,28,46,0.5)' : '#f8faff',
                     border: `1px solid ${s.border}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: collapsed ? 'center' : 'flex-start',
+                    gap: '8px',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <span style={{
-                            width: '6px',
-                            height: '6px',
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
                             borderRadius: '50%',
                             background: (connected || isDemoMode) ? (isDemoMode ? '#F7931A' : '#22c55e') : '#4a5a7a',
-                            display: 'inline-block',
+                            boxShadow: (connected || isDemoMode) ? `0 0 10px ${(connected || isDemoMode) ? (isDemoMode ? '#F7931A' : '#22c55e') : 'transparent'}66` : 'none',
                             animation: (connected || isDemoMode) ? 'pulse 2s infinite' : 'none',
                             flexShrink: 0,
                         }} />
-                        <span style={{
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            color: isDemoMode ? '#F7931A' : (connected ? '#22c55e' : s.text),
-                        }}>
-                            {isDemoMode ? 'Demo Mode Active' : (connected ? 'Wallet Connected' : 'Not Connected')}
-                        </span>
+                        {!collapsed && (
+                            <span style={{
+                                fontSize: '10px',
+                                fontWeight: 800,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                color: isDemoMode ? '#F7931A' : (connected ? '#22c55e' : s.text),
+                            }}>
+                                {isDemoMode ? 'Demo Node' : (connected ? 'Online' : 'Offline')}
+                            </span>
+                        )}
                     </div>
-                    <p style={{ fontSize: '10px', color: s.dim, margin: 0 }}>
-                        {isDemoMode ? 'Previewing with mock data' : (connected ? 'Stacks Testnet' : 'Connect to access all features')}
-                    </p>
+                    {!collapsed && (
+                        <p style={{
+                            fontSize: '9px',
+                            color: s.text,
+                            margin: 0,
+                            lineHeight: 1.4,
+                            opacity: 0.8,
+                        }}>
+                            {isDemoMode ? 'Global preview mode active' : (connected ? 'Stacks Mainnet Alpha' : 'Connect wallet to start')}
+                        </p>
+                    )}
                 </div>
-            )}
-
-            {/* ── Bottom wallet status (collapsed only) ─── */}
-            {collapsed && (
-                <div style={{
-                    margin: '0 auto 20px',
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: (connected || isDemoMode) ? (isDemoMode ? '#F7931A' : '#22c55e') : '#4a5a7a',
-                    animation: (connected || isDemoMode) ? 'pulse 2s infinite' : 'none',
-                    flexShrink: 0,
-                }} />
-            )}
+            </div>
         </aside>
     );
 }
@@ -218,11 +224,13 @@ export function MobileNav() {
 
     return (
         <nav
-            className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden"
+            className="fixed bottom-4 left-4 right-4 z-50 flex md:hidden h-16 rounded-2xl items-center"
             style={{
-                background: isDark ? '#0d1117' : '#ffffff',
-                borderTop: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
-                paddingBottom: 'env(safe-area-inset-bottom)',
+                background: isDark ? 'rgba(13, 17, 23, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(16px)',
+                border: `1px solid ${isDark ? '#1e2d4a' : '#dde5f5'}`,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                padding: '0 8px',
             }}
         >
             {NAV_ITEMS.map(item => (
@@ -236,29 +244,21 @@ export function MobileNav() {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: '10px 4px',
+                        height: '48px',
                         textDecoration: 'none',
                         color: isActive ? '#F7931A' : isDark ? '#4a5a7a' : '#94a3b8',
-                        borderTop: isActive ? '2px solid #F7931A' : '2px solid transparent',
                         transition: 'all 0.2s',
+                        borderRadius: '12px',
+                        background: isActive ? (isDark ? 'rgba(247,147,26,0.1)' : 'rgba(247,147,26,0.05)') : 'transparent',
                     })}
                 >
                     {({ isActive }) => (
                         <span style={{
-                            fontSize: '9px',
+                            fontSize: '14px',
                             fontWeight: isActive ? 800 : 600,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
-                            textAlign: 'center',
-                            lineHeight: 1.3,
+                            transition: 'all 0.2s',
                         }}>
-                            {/* Split two-word labels onto two lines on mobile */}
-                            {item.label.includes(' ')
-                                ? item.label.split(' ').map((word, i) => (
-                                    <span key={i} style={{ display: 'block' }}>{word}</span>
-                                ))
-                                : item.label
-                            }
+                            {item.label[0]}
                         </span>
                     )}
                 </NavLink>
@@ -266,4 +266,3 @@ export function MobileNav() {
         </nav>
     );
 }
-
