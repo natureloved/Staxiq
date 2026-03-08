@@ -11,7 +11,7 @@ const NAV_ITEMS = [
     { path: '/achievements', label: 'Achievements', icon: '🏆', badge: null },
 ];
 
-export default function Sidebar({ connected, collapsed, setCollapsed }) {
+export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed }) {
     const { isDark } = useTheme();
 
     return (
@@ -143,22 +143,22 @@ export default function Sidebar({ connected, collapsed, setCollapsed }) {
                         <span
                             className="w-1.5 h-1.5 rounded-full"
                             style={{
-                                background: connected ? '#22c55e' : '#4a5a7a',
-                                animation: connected ? 'pulse 2s infinite' : 'none',
+                                background: (connected || isDemoMode) ? (isDemoMode ? '#F7931A' : '#22c55e') : '#4a5a7a',
+                                animation: (connected || isDemoMode) ? 'pulse 2s infinite' : 'none',
                             }}
                         />
                         <span
                             className="text-xs font-semibold"
-                            style={{ color: connected ? '#22c55e' : isDark ? '#4a5a7a' : '#8899bb' }}
+                            style={{ color: isDemoMode ? '#F7931A' : (connected ? '#22c55e' : isDark ? '#4a5a7a' : '#8899bb') }}
                         >
-                            {connected ? 'Wallet Connected' : 'Not Connected'}
+                            {isDemoMode ? 'Demo Mode Active' : (connected ? 'Wallet Connected' : 'Not Connected')}
                         </span>
                     </div>
                     <p
                         className="text-[10px]"
                         style={{ color: isDark ? '#4a5a7a' : '#8899bb' }}
                     >
-                        {connected ? 'Stacks Testnet' : 'Connect to access all features'}
+                        {isDemoMode ? 'Previewing with mock data' : (connected ? 'Stacks Testnet' : 'Connect to access all features')}
                     </p>
                 </div>
             )}

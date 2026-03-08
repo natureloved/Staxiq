@@ -9,12 +9,17 @@ export default function DashboardLayout({ connected, children }) {
     return (
         <div
             className="flex items-start"
-            style={{ minHeight: connected ? 'calc(100vh - 88px)' : undefined }}
+            style={{ minHeight: (connected || isDemoMode) ? 'calc(100vh - 88px)' : undefined }}
         >
             {/* Sidebar — desktop only */}
-            {connected && (
+            {(connected || isDemoMode) && (
                 <div className="hidden md:block">
-                    <Sidebar connected={connected} collapsed={collapsed} setCollapsed={setCollapsed} />
+                    <Sidebar
+                        connected={connected}
+                        isDemoMode={isDemoMode}
+                        collapsed={collapsed}
+                        setCollapsed={setCollapsed}
+                    />
                 </div>
             )}
 
@@ -23,20 +28,20 @@ export default function DashboardLayout({ connected, children }) {
                 className="flex-1 overflow-auto flex justify-center transition-all duration-300"
                 style={{
                     background: isDark ? '#0a0e1a' : '#f8faff',
-                    padding: connected ? 'clamp(16px, 3vw, 32px)' : undefined,
-                    paddingBottom: connected ? '80px' : undefined,
+                    padding: (connected || isDemoMode) ? 'clamp(16px, 3vw, 32px)' : undefined,
+                    paddingBottom: (connected || isDemoMode) ? '80px' : undefined,
                 }}
             >
                 <div
                     className="w-full transition-all duration-300"
-                    style={{ maxWidth: (connected && collapsed) ? 'calc(100% - 156px)' : '100%' }}
+                    style={{ maxWidth: ((connected || isDemoMode) && collapsed) ? 'calc(100% - 156px)' : '100%' }}
                 >
                     {children}
                 </div>
             </main>
 
-            {/* Mobile bottom nav — only shown when connected */}
-            {connected && <MobileNav />}
+            {/* Mobile bottom nav — shown only when connected or in demo */}
+            {(connected || isDemoMode) && <MobileNav />}
         </div>
     );
 }

@@ -40,7 +40,7 @@ function AppContent() {
 
       {(!connected && !isDemoMode) && <Hero />}
 
-      <DashboardLayout connected={connected}>
+      <DashboardLayout connected={connected} isDemoMode={isDemoMode}>
         <Routes>
           <Route path="/" element={
             <Overview connected={connected} address={address} />
