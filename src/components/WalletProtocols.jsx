@@ -5,6 +5,17 @@ import { useTheme } from '../context/ThemeContext';
 import { useDemo } from '../context/DemoContext';
 import { useWalletProtocols } from '../hooks/useWalletProtocols';
 
+// Logo URLs for each known protocol
+const PROTOCOL_LOGOS = {
+    stackingdao: 'https://stackingdao.com/icon.png',
+    zest: 'https://zestprotocol.com/favicon.ico',
+    alex: 'https://app.alexlab.co/favicon.ico',
+    bitflow: 'https://bitflow.finance/favicon.ico',
+    hermetica: 'https://hermetica.fi/favicon.ico',
+    velar: 'https://velar.co/favicon.ico',
+    granite: 'https://granite.finance/favicon.ico',
+};
+
 export default function WalletProtocols({ address, demoProtocols }) {
     const { isDark } = useTheme();
     const { isDemoMode } = useDemo();
@@ -137,17 +148,30 @@ export default function WalletProtocols({ address, demoProtocols }) {
                         }}
                     >
                         <div className="flex items-center gap-3">
-                            {/* Color dot */}
+                            {/* Logo or fallback initials */}
                             <div
-                                className="w-9 h-9 rounded-lg flex items-center justify-center font-black text-sm"
+                                className="w-9 h-9 rounded-lg flex items-center justify-center font-black text-sm overflow-hidden"
                                 style={{
                                     background: `${protocol.color}18`,
-                                    color: protocol.color,
                                     border: `1px solid ${protocol.color}33`,
                                     fontFamily: "'JetBrains Mono', monospace",
+                                    flexShrink: 0,
                                 }}
                             >
-                                {protocol.name.slice(0, 2).toUpperCase()}
+                                <img
+                                    src={PROTOCOL_LOGOS[protocol.id] ?? ''}
+                                    alt={protocol.name}
+                                    className="w-6 h-6 object-contain"
+                                    onError={e => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'block';
+                                    }}
+                                />
+                                <span
+                                    style={{ display: 'none', color: protocol.color }}
+                                >
+                                    {protocol.name.slice(0, 2).toUpperCase()}
+                                </span>
                             </div>
 
                             <div>

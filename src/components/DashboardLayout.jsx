@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import Sidebar, { MobileNav } from './Sidebar';
+import Sidebar from './Sidebar';
+import MobileNav from './MobileNav';
 
 export default function DashboardLayout({ connected, isDemoMode, children }) {
     const { isDark } = useTheme();
