@@ -25,7 +25,7 @@ export default function WalletProtocols({ address, demoProtocols }) {
         dim: isDark ? '#4a5a7a' : '#94a3b8',
     };
 
-    // ── Loading ───────────────────────────────────────────────
+    // ── Loading ──────────────────────────────────────────────
     if (isLoading) {
         return (
             <div
@@ -33,12 +33,6 @@ export default function WalletProtocols({ address, demoProtocols }) {
                 style={{ background: s.bg, border: `1px solid ${s.border}` }}
             >
                 <div className="flex items-center gap-3 mb-5">
-                    <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                        style={{ background: '#F7931A11', border: '1px solid #F7931A33' }}
-                    >
-                        🔍
-                    </div>
                     <div>
                         <p className="font-bold text-base" style={{ color: s.text }}>
                             Your Active Positions
@@ -69,12 +63,6 @@ export default function WalletProtocols({ address, demoProtocols }) {
                 style={{ background: s.bg, border: `1px solid ${s.border}` }}
             >
                 <div className="flex items-center gap-3 mb-4">
-                    <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                        style={{ background: '#F7931A11', border: '1px solid #F7931A33' }}
-                    >
-                        📭
-                    </div>
                     <div>
                         <p className="font-bold text-base" style={{ color: s.text }}>
                             Your Active Positions
@@ -108,12 +96,6 @@ export default function WalletProtocols({ address, demoProtocols }) {
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
-                    <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                        style={{ background: '#F7931A11', border: '1px solid #F7931A33' }}
-                    >
-                        📊
-                    </div>
                     <div>
                         <p className="font-bold text-base" style={{ color: s.text }}>
                             Your Active Positions
@@ -202,7 +184,7 @@ export default function WalletProtocols({ address, demoProtocols }) {
                                 style={{ color: protocol.color }}
                             >
                                 {protocol.hasToken
-                                    ? `${protocol.balanceNum.toFixed(4)} ${protocol.asset}`
+                                    ? `${parseFloat(protocol.balanceNum.toFixed(4))} ${protocol.asset}`
                                     : '—'
                                 }
                             </p>
@@ -216,7 +198,7 @@ export default function WalletProtocols({ address, demoProtocols }) {
 
             {/* Footer note */}
             <p className="text-xs text-center mt-4" style={{ color: s.dim }}>
-                Detected via on-chain token balances · Read-only · Non-custodial
+                Detected via on-chain token balances · Read-only
             </p>
         </div>
     );
