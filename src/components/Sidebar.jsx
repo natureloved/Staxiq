@@ -29,7 +29,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
         <aside
             style={{
                 width: collapsed ? '72px' : '240px',
-                height: 'calc(100vh - 24px)',
+                height: 'calc(100vh - 100px)',
                 background: s.bg,
                 backdropFilter: 'blur(16px)',
                 border: `1px solid ${s.border}`,
@@ -39,7 +39,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                 overflow: 'hidden',
                 flexShrink: 0,
                 position: 'fixed',
-                top: '12px',
+                top: '88px',
                 left: '12px',
                 zIndex: 50,
                 boxShadow: isDark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 12px 40px rgba(0,0,0,0.05)',
@@ -168,7 +168,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
             </nav>
 
             {/* ── Status Section ──────────────────────────── */}
-            <div style={{ padding: '16px 12px 24px', marginTop: '12px' }}>
+            <div style={{ padding: '16px 12px 12px' }}>
                 <div style={{
                     padding: '12px',
                     borderRadius: '16px',
