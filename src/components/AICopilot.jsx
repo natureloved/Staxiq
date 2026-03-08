@@ -312,7 +312,7 @@ export default function AICopilot({ connected, address, stxBalance, sbtcBalance,
                 <button
                     onClick={handleGetStrategy}
                     disabled={loading || anchoring}
-                    className={`${strategy && !loading && !anchoring ? 'px-8' : 'w-full'} py-2 rounded-xl font-bold text-white text-sm
+                    className={`${strategy && !loading && !anchoring ? 'px-8' : 'px-10'} py-2 rounded-xl font-bold text-white text-sm
                 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]
                 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100
                 flex items-center justify-center gap-2`}

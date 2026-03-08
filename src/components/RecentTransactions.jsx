@@ -6,9 +6,17 @@ import { useState, useEffect } from 'react';
 
 const HIRO_API = 'https://api.hiro.so';
 
+// Use testnet API for ST... addresses (same as stacksApi.js)
+function getApiBase(address) {
+    return address?.startsWith('ST')
+        ? 'https://api.testnet.hiro.so'
+        : 'https://api.hiro.so';
+}
+
 async function fetchTransactions(address) {
+    const base = getApiBase(address);
     const res = await fetch(
-        `${HIRO_API}/extended/v1/address/${address}/transactions?limit=10`,
+        `${base}/extended/v1/address/${address}/transactions?limit=10`,
         { headers: { Accept: 'application/json' } }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -105,7 +113,7 @@ export default function RecentTransactions({ address }) {
 
                 {!isDemoMode && address && (
                     <a
-                        href={`https://explorer.hiro.so/address/${address}?chain=mainnet`}
+                        href={`https://explorer.hiro.so/address/${address}?chain=${address?.startsWith('ST') ? 'testnet' : 'mainnet'}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs font-bold transition-colors"
