@@ -2,11 +2,19 @@
 // Shows detected DeFi protocol positions for the connected wallet
 
 import { useTheme } from '../context/ThemeContext';
+import { useDemo } from '../context/DemoContext';
 import { useWalletProtocols } from '../hooks/useWalletProtocols';
 
-export default function WalletProtocols({ address }) {
+export default function WalletProtocols({ address, demoProtocols }) {
     const { isDark } = useTheme();
-    const { walletProtocols, loading, error } = useWalletProtocols(address);
+    const { isDemoMode } = useDemo();
+
+    // Use demo data in demo mode, live hook otherwise
+    const { walletProtocols: liveProtocols, loading, error } =
+        useWalletProtocols(isDemoMode ? null : address);
+
+    const walletProtocols = isDemoMode ? (demoProtocols ?? []) : liveProtocols;
+    const isLoading = isDemoMode ? false : loading;
 
     const s = {
         bg: isDark ? '#0d1117' : '#ffffff',
@@ -18,7 +26,7 @@ export default function WalletProtocols({ address }) {
     };
 
     // ── Loading ───────────────────────────────────────────────
-    if (loading) {
+    if (isLoading) {
         return (
             <div
                 className="rounded-2xl p-6"
@@ -54,7 +62,7 @@ export default function WalletProtocols({ address }) {
     }
 
     // ── No positions found ────────────────────────────────────
-    if (!loading && walletProtocols.length === 0) {
+    if (!isLoading && walletProtocols.length === 0) {
         return (
             <div
                 className="rounded-2xl p-6"

@@ -6,7 +6,7 @@ import WalletProtocols from '../components/WalletProtocols';
 import { useCountUp } from '../hooks/useCountUp';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useDemo } from '../context/DemoContext';
-import { DEMO_WALLET, DEMO_STRATEGY } from '../data/demoData';
+import { DEMO_WALLET, DEMO_STRATEGY, DEMO_PROTOCOLS_DETECTED } from '../data/demoData';
 
 export default function Overview({ connected, address }) {
     const { isDemoMode, exitDemo } = useDemo();
@@ -137,7 +137,10 @@ export default function Overview({ connected, address }) {
             <ProtocolCard />
 
             {(connected || isDemoMode) && (
-                <WalletProtocols address={effectiveAddress} />
+                <WalletProtocols
+                    address={effectiveAddress}
+                    demoProtocols={isDemoMode ? DEMO_PROTOCOLS_DETECTED : undefined}
+                />
             )}
 
             <AICopilot

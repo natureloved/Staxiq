@@ -66,3 +66,39 @@ Step 3: Go to zestprotocol.com → click "Supply" → deposit 0.029 sBTC → con
 
 export const IS_DEMO_ADDRESS = (address) =>
     address === DEMO_WALLET.address;
+
+export const DEMO_PROTOCOLS_DETECTED = [
+    {
+        id: 'stackingdao',
+        name: 'StackingDAO',
+        color: '#3B82F6',
+        asset: 'stSTX',
+        type: 'Stacking',
+        description: 'Liquid stacking position',
+        confidence: 'confirmed',
+        hasToken: true,
+        balanceNum: 2000.0000,
+    },
+    {
+        id: 'zest',
+        name: 'Zest Protocol',
+        color: '#F7931A',
+        asset: 'zsBTC',
+        type: 'Lending',
+        description: 'sBTC lending position',
+        confidence: 'confirmed',
+        hasToken: true,
+        balanceNum: 0.0192,
+    },
+    {
+        id: 'alex',
+        name: 'ALEX Lab',
+        color: '#f59e0b',
+        asset: 'atALEX',
+        type: 'DEX / Yield',
+        description: 'Auto-compounding ALEX position',
+        confidence: 'likely',
+        hasToken: false,
+        balanceNum: 0,
+    },
+];
