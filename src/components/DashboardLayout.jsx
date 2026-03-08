@@ -13,7 +13,11 @@ export default function DashboardLayout({ connected, isDemoMode, children }) {
         >
             {/* Sidebar — desktop only */}
             {(connected || isDemoMode) && (
-                <div className="hidden md:block">
+                <div className="hidden md:block" style={{
+                    width: collapsed ? '84px' : '252px',
+                    transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    flexShrink: 0
+                }}>
                     <Sidebar
                         connected={connected}
                         isDemoMode={isDemoMode}

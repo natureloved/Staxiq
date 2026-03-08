@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
 const NAV_ITEMS = [
-    { path: '/', label: 'Overview', badge: null },
+    { path: '/', label: 'Dashboard', badge: null },
     { path: '/yield', label: 'Yield Calculator', badge: 'NEW' },
     { path: '/stacking', label: 'Stacking Tracker', badge: 'NEW' },
     { path: '/health', label: 'Health Score', badge: 'NEW' },
@@ -30,8 +30,6 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
             style={{
                 width: collapsed ? '72px' : '240px',
                 height: 'calc(100vh - 24px)',
-                margin: '12px',
-                borderRadius: '24px',
                 background: s.bg,
                 backdropFilter: 'blur(16px)',
                 border: `1px solid ${s.border}`,
@@ -40,10 +38,12 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                 transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 overflow: 'hidden',
                 flexShrink: 0,
-                position: 'sticky',
+                position: 'fixed',
                 top: '12px',
+                left: '12px',
                 zIndex: 50,
                 boxShadow: isDark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 12px 40px rgba(0,0,0,0.05)',
+                borderRadius: '24px',
             }}
         >
             {/* ── Header / Toggle ───────────────────────────── */}
@@ -61,7 +61,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                         letterSpacing: '0.15em',
                         color: '#F7931A',
                     }}>
-                        STAXIQ OPS
+                        Explore Staxiq
                     </span>
                 )}
                 <button
@@ -87,7 +87,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
             </div>
 
             {/* ── Nav items ───────────────────────────────── */}
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 12px', flex: 1 }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 12px' }}>
                 {NAV_ITEMS.map(item => (
                     <NavLink
                         key={item.path}
@@ -168,7 +168,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
             </nav>
 
             {/* ── Status Section ──────────────────────────── */}
-            <div style={{ padding: '16px 12px 24px' }}>
+            <div style={{ padding: '16px 12px 24px', marginTop: '12px' }}>
                 <div style={{
                     padding: '12px',
                     borderRadius: '16px',
@@ -197,7 +197,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                                 letterSpacing: '0.05em',
                                 color: isDemoMode ? '#F7931A' : (connected ? '#22c55e' : s.text),
                             }}>
-                                {isDemoMode ? 'Demo Node' : (connected ? 'Online' : 'Offline')}
+                                {isDemoMode ? 'Demo Node' : (connected ? 'Wallet Connected' : 'Offline')}
                             </span>
                         )}
                     </div>
@@ -209,7 +209,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                             lineHeight: 1.4,
                             opacity: 0.8,
                         }}>
-                            {isDemoMode ? 'Global preview mode active' : (connected ? 'Stacks Mainnet Alpha' : 'Connect wallet to start')}
+                            {isDemoMode ? 'Global preview mode active' : (connected ? 'Stacks Testnet Alpha' : 'Connect wallet to start')}
                         </p>
                     )}
                 </div>
