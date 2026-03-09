@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { authenticate, AppConfig, UserSession } from '@stacks/connect'; // ✅ authenticate, not showConnect
+import { connect, disconnect, AppConfig, UserSession } from '@stacks/connect'; // ✅ v8 API
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
@@ -13,14 +13,9 @@ export function useWallet() {
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
     const getStxAddress = (userData) => {
-        try {
-            return isDev
-                ? userData?.profile?.stxAddress?.testnet
-                : userData?.profile?.stxAddress?.mainnet;
-        } catch (e) {
-            console.error('Error loading STX address:', e);
-            return null;
-        }
+        return isDev
+            ? userData?.profile?.stxAddress?.testnet
+            : userData?.profile?.stxAddress?.mainnet;
     };
 
     useEffect(() => {
@@ -34,38 +29,40 @@ export function useWallet() {
         }
     }, []);
 
-    function connectWallet() {
+    async function connectWallet() {
         if (loading) return;
         setLoading(true);
+        try {
+            await connect({                     // ✅ v8: promise-based, no callbacks
+                appDetails: {
+                    name: 'Staxiq',
+                    icon: window.location.origin + '/favicon.ico',
+                },
+                userSession,
+            });
 
-        authenticate({
-            userSession,
-            appDetails: {
-                name: 'Staxiq',
-                icon: window.location.origin + '/favicon.ico',
-            },
-            onFinish: ({ userSession: session }) => {  // ✅ read from payload
-                try {
-                    const userData = session.loadUserData();
-                    const addr = getStxAddress(userData);
-                    if (addr) {
-                        setAddress(addr);
-                        setConnected(true);
-                    }
-                } catch (err) {
-                    console.error('Error reading wallet data:', err);
-                } finally {
-                    setLoading(false);
+            if (userSession.isUserSignedIn()) {
+                const userData = userSession.loadUserData();
+                const addr = getStxAddress(userData);
+                if (addr) {
+                    setAddress(addr);
+                    setConnected(true);
                 }
-            },
-            onCancel: () => {
-                setLoading(false);
-            },
-        });
+            }
+        } catch (err) {
+            if (err?.message?.includes('cancel') || err?.message?.includes('closed')) {
+                // User cancelled — not a real error
+            } else {
+                console.error('Wallet connection failed:', err);
+            }
+        } finally {
+            setLoading(false);
+        }
     }
 
     function disconnectWallet() {
         try {
+            disconnect();                       // ✅ v8: use disconnect(), not signUserOut()
             userSession.signUserOut();
         } catch (err) {
             console.error('Logout error:', err);
