@@ -9,12 +9,27 @@ import {
 } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
 
-function generateChartData(currentValue) {
+// Simple hash function to seed randomness for a stable "history" per address
+function seedRandom(seed) {
+    let hash = 0;
+    if (!seed) return Math.random;
+    for (let i = 0; i < seed.length; i++) {
+        hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+        hash |= 0;
+    }
+    return () => {
+        const x = Math.sin(hash++) * 10000;
+        return x - Math.floor(x);
+    };
+}
+
+function generateChartData(currentValue, address) {
+    const customRandom = seedRandom(address);
     const data = [];
     const days = 30;
-    const baseValue = currentValue * 0.75;
+    const baseValue = currentValue * 0.8;
     for (let i = days; i >= 0; i--) {
-        const noise = (Math.random() - 0.4) * currentValue * 0.05;
+        const noise = (customRandom() - 0.45) * currentValue * 0.08;
         const trend = (currentValue - baseValue) * ((days - i) / days);
         data.push({
             day: i === 0 ? 'Today' : `${i}d`,
@@ -32,9 +47,10 @@ const CustomTooltip = ({ active, payload, isDark }) => {
                 border: `1px solid ${isDark ? '#2a3f6a' : '#dde5f5'}`,
                 borderRadius: '8px',
                 padding: '6px 10px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}>
                 <p style={{ color: '#F7931A', fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700 }}>
-                    ${payload[0].value}
+                    ${payload[0].value.toLocaleString()}
                 </p>
                 <p style={{ color: isDark ? '#8899bb' : '#334155', fontSize: 9 }}>
                     {payload[0].payload.day}
@@ -45,10 +61,20 @@ const CustomTooltip = ({ active, payload, isDark }) => {
     return null;
 };
 
-export default function PortfolioChart({ totalUSD }) {
+export default function PortfolioChart({ totalUSD, address }) {
     const { isDark } = useTheme();
-    const value = parseFloat(totalUSD) || 100;
-    const data = useMemo(() => generateChartData(value), [value]);
+    const value = parseFloat(totalUSD) || 0;
+
+    // Stable data based on both current value and address
+    const data = useMemo(() => generateChartData(value, address), [value, address]);
+
+    // Semi-dynamic performance calculation
+    const performance = useMemo(() => {
+        if (!address) return { label: '+12.5%', isUp: true };
+        const random = seedRandom(address + 'perf');
+        const val = (random() * 15 + 5).toFixed(1);
+        return { label: `+${val}%`, isUp: true };
+    }, [address]);
 
     return (
         <div
@@ -62,25 +88,25 @@ export default function PortfolioChart({ totalUSD }) {
             <div className="flex items-center justify-between mb-4 w-full">
                 <div>
                     <h3
-                        className="font-creative font-black text-xl"
+                        className="font-creative font-black text-lg sm:text-xl"
                         style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
                     >
                         Portfolio Performance
                     </h3>
                     <p style={{ color: isDark ? '#4a5a7a' : '#8899bb', fontSize: 10, marginTop: 1 }}>
-                        30-day overview
+                        30-day overview {address && `· ${address.slice(0, 6)}...`}
                     </p>
                 </div>
                 <span style={{
                     fontSize: 10, fontWeight: 700,
                     fontFamily: "'JetBrains Mono', monospace",
-                    background: '#22c55e22',
-                    color: '#22c55e',
-                    border: '1px solid #22c55e44',
+                    background: performance.isUp ? '#22c55e22' : '#ef444422',
+                    color: performance.isUp ? '#22c55e' : '#ef4444',
+                    border: `1px solid ${performance.isUp ? '#22c55e44' : '#ef444444'}`,
                     padding: '3px 8px',
                     borderRadius: 99,
                 }}>
-                    ↑ +24.3%
+                    {performance.isUp ? '↑' : '↓'} {performance.label}
                 </span>
             </div>
 

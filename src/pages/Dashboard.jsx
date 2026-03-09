@@ -133,7 +133,7 @@ export default function Overview({ connected, address }) {
             </div>
 
             {/* Portfolio Chart Section */}
-            <PortfolioChart totalUSD={displayData.totalUSD} />
+            <PortfolioChart totalUSD={displayData.totalUSD} address={effectiveAddress} />
 
             <ProtocolCard />
 
