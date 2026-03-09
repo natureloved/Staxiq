@@ -43,6 +43,19 @@ async function fetchTransactions(address) {
                 diff < 86400 ? `${Math.floor(diff / 3600)} hours ago` :
                     `${Math.floor(diff / 86400)} days ago`;
 
+        // ✅ Extract Amount (STX)
+        let amount = '—';
+        if (tx.token_transfer) {
+            amount = (parseInt(tx.token_transfer.amount) / 1_000_000).toFixed(2) + ' STX';
+        } else if (tx.stx_transfers && tx.stx_transfers.length > 0) {
+            const internalXfer = tx.stx_transfers.find(x =>
+                x.sender === address || x.recipient === address
+            );
+            if (internalXfer) {
+                amount = (parseInt(internalXfer.amount) / 1_000_000).toFixed(2) + ' STX';
+            }
+        }
+
         return {
             txId: tx.tx_id,
             type: isContractCall ? 'Contract Call' : 'Token Transfer',
@@ -50,7 +63,7 @@ async function fetchTransactions(address) {
             action: fnName
                 ? fnName.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
                 : tx.tx_type.replace(/_/g, ' '),
-            amount: '—',
+            amount,
             status: tx.tx_status === 'success' ? 'success' : 'pending',
             timestamp: timeAgo,
             color,
