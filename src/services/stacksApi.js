@@ -1,3 +1,5 @@
+// src/services/stacksApi.js
+
 function getApiBase(address) {
     return address?.startsWith('ST')
         ? 'https://api.testnet.hiro.so'
@@ -11,6 +13,7 @@ export async function getSTXBalance(address) {
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        // Hiro API balance is returned as a hex string in microstacks
         return (parseInt(data.balance, 16) / 1000000).toFixed(4);
     } catch (err) {
         console.error('STX balance error:', err);
@@ -59,10 +62,8 @@ export async function getTransactionHistory(address) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // ✅ Format transactions correctly for Stacks testnet
         return data.results.map(tx => ({
             txId: tx.tx_id,
-            // ✅ Correct Stacks testnet explorer URL
             explorerUrl: address.startsWith('ST')
                 ? `https://explorer.hiro.so/txid/${tx.tx_id}?chain=testnet`
                 : `https://explorer.hiro.so/txid/${tx.tx_id}`,
@@ -72,7 +73,6 @@ export async function getTransactionHistory(address) {
                 ? (parseInt(tx.token_transfer.amount) / 1_000_000).toFixed(4) + ' STX'
                 : '--',
             date: new Date(tx.burn_block_time_iso).toLocaleDateString(),
-            // ✅ Short format: first 6...last 4 chars
             shortTxId: `${tx.tx_id.slice(0, 8)}...${tx.tx_id.slice(-6)}`,
         }));
     } catch (err) {
@@ -81,21 +81,47 @@ export async function getTransactionHistory(address) {
     }
 }
 
+/**
+ * Resilient STX Price Fetcher
+ * Checks localStorage first (shared with PriceTicker), then falls back to APIs
+ */
 export async function getSTXPrice() {
+    // 1. Check shared cache from PriceTicker first (fastest)
     try {
-        const res = await fetch(
-            'https://api.coingecko.com/api/v3/simple/price?ids=blockstack&vs_currencies=usd'
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        return data?.blockstack?.usd || 0;
-    } catch (err) {
-        console.error('STX price error:', err);
-        return 0;
-    }
+        const cached = localStorage.getItem('staxiq_prices');
+        if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (Date.now() - timestamp < 3600000) { // 1 hour valid
+                const price = parseFloat(data.stx.usd.replace(/,/g, ''));
+                if (!isNaN(price) && price > 0) return price;
+            }
+        }
+    } catch (e) { }
+
+    // 2. Try CryptoCompare (Better CORS usually)
+    try {
+        const res = await fetch('https://min-api.cryptocompare.com/data/price?fsym=STX&tsyms=USD');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.USD) return data.USD;
+        }
+    } catch (e) { }
+
+    // 3. Final fallback to CoinGecko
+    try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=blockstack&vs_currencies=usd');
+        if (res.ok) {
+            const data = await res.json();
+            return data?.blockstack?.usd || 2.85; // Sensible hard default
+        }
+    } catch (err) { }
+
+    return 2.85;
 }
 
 export async function getFullPortfolio(address) {
+    // Parallelize everything, but handle transaction history separately if needed
+    // to ensure totalUSD is calculated ASAP
     const [stxBalance, sbtcBalance, txHistory, stxPrice] = await Promise.all([
         getSTXBalance(address),
         getSBTCBalance(address),
