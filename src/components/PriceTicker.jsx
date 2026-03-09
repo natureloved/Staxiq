@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 
-// Fallback values in case of 429/CORS
-const FALLBACK_PRICES = {
-    bitcoin: { usd: 94500, usd_24h_change: 1.25 },
-    blockstack: { usd: 2.85, usd_24h_change: -0.52 }
+// Hardcoded fallbacks if everything else fails
+const DEFAULT_PRICES = {
+    btc: { usd: '94,500', change: 1.25 },
+    stx: { usd: '2.850', change: -0.52 },
+    sbtc: 1.0001
 };
 
 export default function PriceTicker() {
@@ -13,55 +14,95 @@ export default function PriceTicker() {
         sbtc: 1.0001,
     });
 
-    // Prevent rapid fire fetches (especially during HMR)
     const lastFetchRef = useRef(0);
 
     useEffect(() => {
         async function fetchPrices() {
             const now = Date.now();
-            if (now - lastFetchRef.current < 30000) return; // Wait at least 30s
+            // Don't fetch more than once every 5 minutes (300,000ms) to avoid 429s in Dev/Production
+            if (now - lastFetchRef.current < 300000) return;
 
+            // 1. Try Loading from Cache First to avoid flicker
+            let currentPrices = { ...prices };
+            try {
+                const cached = localStorage.getItem('staxiq_prices');
+                if (cached) {
+                    const { data, timestamp } = JSON.parse(cached);
+                    // If cache is less than 1 hour old, use it as baseline
+                    if (now - timestamp < 3600000) {
+                        currentPrices = data;
+                        setPrices(data);
+                    }
+                }
+            } catch (e) { /* ignore cache errors */ }
+
+            let success = false;
+
+            // 2. Try CoinGecko (Source A)
             try {
                 const res = await fetch(
-                    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,blockstack&vs_currencies=usd&include_24hr_change=true',
-                    { mode: 'cors' }
+                    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,blockstack&vs_currencies=usd&include_24hr_change=true'
                 );
-
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-                const data = await res.json();
-                lastFetchRef.current = Date.now();
-
-                setPrices({
-                    btc: {
-                        usd: data.bitcoin?.usd?.toLocaleString() || FALLBACK_PRICES.bitcoin.usd.toLocaleString(),
-                        change: data.bitcoin?.usd_24h_change?.toFixed(2) || FALLBACK_PRICES.bitcoin.usd_24h_change,
-                    },
-                    stx: {
-                        usd: data.blockstack?.usd?.toFixed(3) || FALLBACK_PRICES.blockstack.usd.toFixed(3),
-                        change: data.blockstack?.usd_24h_change?.toFixed(2) || FALLBACK_PRICES.blockstack.usd_24h_change,
-                    },
-                    sbtc: 1.0001,
-                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const newPrices = {
+                        btc: {
+                            usd: data.bitcoin?.usd?.toLocaleString() || DEFAULT_PRICES.btc.usd,
+                            change: data.bitcoin?.usd_24h_change?.toFixed(2) || DEFAULT_PRICES.btc.change,
+                        },
+                        stx: {
+                            usd: data.blockstack?.usd?.toFixed(3) || DEFAULT_PRICES.stx.usd,
+                            change: data.blockstack?.usd_24h_change?.toFixed(2) || DEFAULT_PRICES.stx.change,
+                        },
+                        sbtc: 1.0001,
+                    };
+                    setPrices(newPrices);
+                    localStorage.setItem('staxiq_prices', JSON.stringify({ data: newPrices, timestamp: now }));
+                    success = true;
+                    lastFetchRef.current = now;
+                }
             } catch (err) {
-                console.warn('Price fetch failed (using fallback):', err.message);
-                // Set fallback data so UI isn't empty
-                setPrices(prev => ({
-                    ...prev,
-                    btc: {
-                        usd: FALLBACK_PRICES.bitcoin.usd.toLocaleString(),
-                        change: FALLBACK_PRICES.bitcoin.usd_24h_change,
-                    },
-                    stx: {
-                        usd: FALLBACK_PRICES.blockstack.usd.toFixed(3),
-                        change: FALLBACK_PRICES.blockstack.usd_24h_change,
+                console.log('CoinGecko fallback triggered (CORS/429)');
+            }
+
+            // 3. Try CryptoCompare (Source B - much better CORS support)
+            if (!success) {
+                try {
+                    const res = await fetch('https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,STX&tsyms=USD');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.RAW) {
+                            const raw = data.RAW;
+                            const newPrices = {
+                                btc: {
+                                    usd: raw.BTC.USD.PRICE.toLocaleString(),
+                                    change: raw.BTC.USD.CHANGEPCT24HOUR.toFixed(2),
+                                },
+                                stx: {
+                                    usd: raw.STX.USD.PRICE.toFixed(3),
+                                    change: raw.STX.USD.CHANGEPCT24HOUR.toFixed(2),
+                                },
+                                sbtc: 1.0001,
+                            };
+                            setPrices(newPrices);
+                            localStorage.setItem('staxiq_prices', JSON.stringify({ data: newPrices, timestamp: now }));
+                            success = true;
+                            lastFetchRef.current = now;
+                        }
                     }
-                }));
+                } catch (err) {
+                    console.log('CryptoCompare fetch failed');
+                }
+            }
+
+            // 4. Final Fallback to defaults if No UI data yet and no cache
+            if (!success && prices.btc.usd === '--') {
+                setPrices(DEFAULT_PRICES);
             }
         }
 
         fetchPrices();
-        const interval = setInterval(fetchPrices, 60_000);
+        const interval = setInterval(fetchPrices, 600000); // Check every 10 mins
         return () => clearInterval(interval);
     }, []);
 
