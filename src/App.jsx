@@ -16,6 +16,7 @@ import StackingTracker from './pages/StackingTracker';
 import HealthScore from './pages/HealthScore';
 import CompareProtocols from './pages/CompareProtocols';
 import Achievements from './pages/Achievements';
+import AICopilotPage from './pages/AICopilotPage';
 
 
 function AppContent() {
@@ -61,6 +62,16 @@ function AppContent() {
           } />
           <Route path="/achievements" element={
             <Achievements connected={connected} address={address} />
+          } />
+          <Route path="/copilot" element={
+            <AICopilotPage
+              connected={connected}
+              address={address}
+              stxBalance={0}
+              sbtcBalance={0}
+              totalUSD={0}
+              txCount={0}
+            />
           } />
 
         </Routes>
