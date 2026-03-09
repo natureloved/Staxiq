@@ -13,7 +13,7 @@ export async function getAIStrategy({
 
     // Gemini API works directly in production (Vercel)
     // Uses local proxy only in development
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`;
 
     const isNewUser = strategyCount === 0 && txCount < 3;
     const isExperienced = strategyCount > 5 || txCount > 20;
@@ -95,6 +95,10 @@ ${isNewUser ? `
 
 🚀 EXECUTE NOW: [Specific next action with protocol name]
 `}`;
+
+    console.log('API Key present:', !!import.meta.env.VITE_GEMINI_API_KEY);
+    console.log('Risk profile:', riskProfile);
+    console.log('Address:', address);
 
     const response = await fetch(
         apiUrl,

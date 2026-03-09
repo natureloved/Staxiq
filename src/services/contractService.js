@@ -28,7 +28,7 @@ function getNetwork() {
 // ✅ Save risk profile on-chain (Wallet Popup)
 export async function saveRiskProfile(riskLevel) {
     return new Promise((resolve) => {
-        const riskMap = { Conservative: 1, Balanced: 2, Aggressive: 3 };
+        const riskMap = { HODLer: 1, Builder: 2, Degen: 3 };
         const level = riskMap[riskLevel] || 2;
 
         showConnect({

@@ -69,7 +69,7 @@ export const PROTOCOL_META = [
     {
         id: 'hermetica',
         name: 'Hermetica',
-        slug: 'hermetica',
+        slug: 'hermetica-usdh',
         type: 'Yield',
         asset: 'sBTC',
         risk: 'High',
@@ -85,7 +85,7 @@ export const PROTOCOL_META = [
     {
         id: 'velar',
         name: 'Velar',
-        slug: 'velar',
+        slug: 'velar-protocol',
         type: 'DEX',
         asset: 'STX',
         risk: 'Medium',

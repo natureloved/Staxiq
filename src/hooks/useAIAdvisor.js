@@ -6,7 +6,7 @@ export function useAIAdvisor({ address, stxBalance, sbtcBalance, totalUSD }) {
     const [strategy, setStrategy] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [riskProfile, setRiskProfile] = useState('Balanced');
+    const [riskProfile, setRiskProfile] = useState('HODLer');
 
     async function fetchStrategy() {
         if (!address) return;

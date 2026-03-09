@@ -118,7 +118,7 @@ export default function AICopilot({ connected, address, stxBalance, sbtcBalance,
     const { isDark } = useTheme();
     const { protocols } = useProtocolData();
 
-    const [riskProfile, setRiskProfile] = useState('Balanced');
+    const [riskProfile, setRiskProfile] = useState('HODLer');
     const [strategy, setStrategy] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
