@@ -1,4 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+// Fallback values in case of 429/CORS
+const FALLBACK_PRICES = {
+    bitcoin: { usd: 94500, usd_24h_change: 1.25 },
+    blockstack: { usd: 2.85, usd_24h_change: -0.52 }
+};
 
 export default function PriceTicker() {
     const [prices, setPrices] = useState({
@@ -7,31 +13,54 @@ export default function PriceTicker() {
         sbtc: 1.0001,
     });
 
+    // Prevent rapid fire fetches (especially during HMR)
+    const lastFetchRef = useRef(0);
+
     useEffect(() => {
         async function fetchPrices() {
+            const now = Date.now();
+            if (now - lastFetchRef.current < 30000) return; // Wait at least 30s
+
             try {
                 const res = await fetch(
-                    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,blockstack&vs_currencies=usd&include_24hr_change=true'
+                    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,blockstack&vs_currencies=usd&include_24hr_change=true',
+                    { mode: 'cors' }
                 );
+
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
                 const data = await res.json();
+                lastFetchRef.current = Date.now();
+
                 setPrices({
                     btc: {
-                        usd: data.bitcoin?.usd?.toLocaleString() || '--',
-                        change: data.bitcoin?.usd_24h_change?.toFixed(2) || 0,
+                        usd: data.bitcoin?.usd?.toLocaleString() || FALLBACK_PRICES.bitcoin.usd.toLocaleString(),
+                        change: data.bitcoin?.usd_24h_change?.toFixed(2) || FALLBACK_PRICES.bitcoin.usd_24h_change,
                     },
                     stx: {
-                        usd: data.blockstack?.usd?.toFixed(3) || '--',
-                        change: data.blockstack?.usd_24h_change?.toFixed(2) || 0,
+                        usd: data.blockstack?.usd?.toFixed(3) || FALLBACK_PRICES.blockstack.usd.toFixed(3),
+                        change: data.blockstack?.usd_24h_change?.toFixed(2) || FALLBACK_PRICES.blockstack.usd_24h_change,
                     },
                     sbtc: 1.0001,
                 });
             } catch (err) {
-                console.warn('Price fetch failed:', err);
+                console.warn('Price fetch failed (using fallback):', err.message);
+                // Set fallback data so UI isn't empty
+                setPrices(prev => ({
+                    ...prev,
+                    btc: {
+                        usd: FALLBACK_PRICES.bitcoin.usd.toLocaleString(),
+                        change: FALLBACK_PRICES.bitcoin.usd_24h_change,
+                    },
+                    stx: {
+                        usd: FALLBACK_PRICES.blockstack.usd.toFixed(3),
+                        change: FALLBACK_PRICES.blockstack.usd_24h_change,
+                    }
+                }));
             }
         }
 
         fetchPrices();
-        // Refresh every 60 seconds
         const interval = setInterval(fetchPrices, 60_000);
         return () => clearInterval(interval);
     }, []);
@@ -42,11 +71,10 @@ export default function PriceTicker() {
         { label: 'sBTC/BTC', value: prices.sbtc, change: -0.01 },
     ];
 
-    // Duplicate for seamless loop
     const tickerItems = [...items, ...items, ...items];
 
     return (
-        <div className="bg-orange-500 text-white overflow-hidden py-1.5">
+        <div className="bg-orange-500 text-white overflow-hidden py-1.5 shadow-sm">
             <div className="flex animate-ticker whitespace-nowrap">
                 {tickerItems.map((item, i) => (
                     <span key={i} className="inline-flex items-center gap-2 px-8 text-xs font-semibold font-mono">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { connect, disconnect, AppConfig, UserSession } from '@stacks/connect'; // ✅ v8 API
+import { authenticate, AppConfig, UserSession } from '@stacks/connect';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
@@ -29,49 +29,46 @@ export function useWallet() {
         }
     }, []);
 
-    async function connectWallet() {
+    function connectWallet() {
         if (loading) return;
         setLoading(true);
-        try {
-            const result = await connect({                     // ✅ v8: promise-based, no callbacks
-                appDetails: {
-                    name: 'Staxiq',
-                    icon: window.location.origin + '/favicon.ico',
-                },
-                userSession,
-            });
 
-            console.log('connect() result:', result);             // 👈 add this
-            console.log('isSignedIn:', userSession.isUserSignedIn()); // 👈 and this
-
-            if (userSession.isUserSignedIn()) {
-                const userData = userSession.loadUserData();
+        authenticate({
+            userSession,
+            appDetails: {
+                name: 'Staxiq',
+                icon: window.location.origin + '/favicon.ico',
+            },
+            onFinish: (payload) => {
+                const userData = payload.userSession.loadUserData();
                 const addr = getStxAddress(userData);
+
+                console.log('Authentication successful');
+                console.log('isSignedIn:', payload.userSession.isUserSignedIn());
+
                 if (addr) {
                     setAddress(addr);
                     setConnected(true);
                 }
-            }
-        } catch (err) {
-            if (err?.message?.includes('cancel') || err?.message?.includes('closed')) {
-                // User cancelled — not a real error
-            } else {
-                console.error('Wallet connection failed:', err);
-            }
-        } finally {
-            setLoading(false);
-        }
+                setLoading(false);
+                // Optional: reload to ensure all components reactive to localStorage sync
+                // window.location.reload(); 
+            },
+            onCancel: () => {
+                setLoading(false);
+            },
+        });
     }
 
     function disconnectWallet() {
         try {
-            disconnect();                       // ✅ v8: use disconnect(), not signUserOut()
             userSession.signUserOut();
         } catch (err) {
             console.error('Logout error:', err);
         }
         setConnected(false);
         setAddress(null);
+        window.location.reload();
     }
 
     function shortAddress(addr) {
