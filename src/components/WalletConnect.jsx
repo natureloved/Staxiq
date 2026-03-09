@@ -26,13 +26,6 @@ const WalletConnect = ({ connected, address, connectWallet, disconnectWallet, lo
                 </button>
             ) : (
                 <div className="flex items-center gap-2">
-                    <div
-                        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
-                        style={{ background: 'linear-gradient(135deg, #22c55e22, #22c55e11)', border: '1px solid #22c55e44' }}
-                    >
-                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" style={{ boxShadow: '0 0 6px rgba(34,197,94,0.8)' }} />
-                        <span className="text-green-400 text-xs font-bold hidden sm:inline">Connected</span>
-                    </div>
                     <div className="flex items-center gap-1.5 bg-orange-500 px-2.5 py-1.5 rounded-lg">
                         <span className="text-white text-xs font-mono font-bold">
                             {shortAddress(address)}
