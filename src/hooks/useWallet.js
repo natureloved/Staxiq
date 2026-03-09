@@ -33,13 +33,16 @@ export function useWallet() {
         if (loading) return;
         setLoading(true);
         try {
-            await connect({                     // ✅ v8: promise-based, no callbacks
+            const result = await connect({                     // ✅ v8: promise-based, no callbacks
                 appDetails: {
                     name: 'Staxiq',
                     icon: window.location.origin + '/favicon.ico',
                 },
                 userSession,
             });
+
+            console.log('connect() result:', result);             // 👈 add this
+            console.log('isSignedIn:', userSession.isUserSignedIn()); // 👈 and this
 
             if (userSession.isUserSignedIn()) {
                 const userData = userSession.loadUserData();
