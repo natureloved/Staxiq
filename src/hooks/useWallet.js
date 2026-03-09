@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { authenticate, AppConfig, UserSession } from '@stacks/connect';
+import { useNetwork } from '../context/NetworkContext';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
 
 export function useWallet() {
+    const { network } = useNetwork();
     const [connected, setConnected] = useState(false);
     const [address, setAddress] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const isDev = typeof window !== 'undefined' &&
-        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
     const getStxAddress = (userData) => {
-        return isDev
+        return network === 'testnet'
             ? userData?.profile?.stxAddress?.testnet
             : userData?.profile?.stxAddress?.mainnet;
     };

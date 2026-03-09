@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { DemoProvider, useDemo } from './context/DemoContext';
+import { NetworkProvider } from './context/NetworkContext';
 import { useWallet } from './hooks/useWallet';
 import Onboarding from './components/Onboarding';
 import Navbar from './components/Navbar';
@@ -74,10 +75,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <DemoProvider>
-          <Onboarding onComplete={() => { }} />
-          <AppContent />
-        </DemoProvider>
+        <NetworkProvider>
+          <DemoProvider>
+            <Onboarding onComplete={() => { }} />
+            <AppContent />
+          </DemoProvider>
+        </NetworkProvider>
       </ThemeProvider>
     </BrowserRouter>
   );
