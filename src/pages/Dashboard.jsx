@@ -1,3 +1,4 @@
+import React from 'react';
 import ProtocolCard from '../components/ProtocolCard';
 import PortfolioChart from '../components/PortfolioChart';
 import WalletProtocols from '../components/WalletProtocols';
