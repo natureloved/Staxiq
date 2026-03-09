@@ -67,10 +67,6 @@ function AppContent() {
             <AICopilotPage
               connected={connected}
               address={address}
-              stxBalance={0}
-              sbtcBalance={0}
-              totalUSD={0}
-              txCount={0}
             />
           } />
 

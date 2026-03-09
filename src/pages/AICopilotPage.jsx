@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useProtocolData } from '../hooks/useProtocolData';
 import { getAIStrategy } from '../services/aiService';
+import { usePortfolio } from '../hooks/usePortfolio';
+import { useDemo } from '../context/DemoContext';
+import { DEMO_WALLET } from '../data/demoData';
 import {
     saveRiskProfile,
     anchorStrategy,
@@ -55,26 +58,56 @@ function stripEmoji(str) {
 
 function StrategySection({ heading, body, isDark, isLast, headingColor }) {
     return (
-        <div className={`py-4 ${!isLast ? 'border-b' : ''}`} style={{ borderColor: isDark ? '#1e2d4a' : '#dde5f5' }}>
+        <div className={`py-6 ${!isLast ? 'border-b' : ''}`} style={{ borderColor: isDark ? '#1e2d4a' : '#dde5f5' }}>
             {heading && (
-                <p className="font-bold text-sm mb-3 uppercase tracking-wider" style={{ color: headingColor }}>
+                <p className="font-bold text-sm mb-4 uppercase tracking-widest" style={{ color: headingColor }}>
                     {stripEmoji(heading)}
                 </p>
             )}
-            <div className="space-y-2">
-                {body.map((line, i) => (
-                    <p key={i} className="text-sm leading-relaxed" style={{ color: isDark ? '#c8d8f0' : '#4a5a7a' }}>
-                        {line}
-                    </p>
-                ))}
+            <div className="space-y-3">
+                {body.map((line, i) => {
+                    const isStep = /^(Step\s*\d+:|^\d+\.|^•)/.test(line);
+                    const isAlloc = line.includes('%') && line.includes(':');
+
+                    return (
+                        <p
+                            key={i}
+                            className="text-sm leading-relaxed"
+                            style={{
+                                color: isDark ? '#c8d8f0' : '#4a5a7a',
+                                borderLeft: isStep ? `2px solid ${headingColor}44` : 'none',
+                                paddingLeft: isStep ? '16px' : 0,
+                                fontWeight: isAlloc ? 700 : 400,
+                            }}
+                        >
+                            {line}
+                        </p>
+                    );
+                })}
             </div>
         </div>
     );
 }
 
-export default function AICopilotPage({ connected, address, stxBalance, sbtcBalance, totalUSD, txCount }) {
+export default function AICopilotPage({ connected, address }) {
     const { isDark } = useTheme();
     const { protocols } = useProtocolData();
+    const { isDemoMode } = useDemo();
+
+    const effectiveAddress = isDemoMode ? DEMO_WALLET.address : address;
+    const { portfolio, loading: portfolioLoading } = usePortfolio(effectiveAddress);
+
+    const displayData = isDemoMode ? {
+        stxBalance: DEMO_WALLET.stxBalance,
+        sbtcBalance: DEMO_WALLET.sbtcBalance,
+        totalUSD: DEMO_WALLET.totalUSD,
+        txCount: DEMO_WALLET.txCount,
+    } : {
+        stxBalance: portfolio.stxBalance,
+        sbtcBalance: portfolio.sbtcBalance,
+        totalUSD: portfolio.totalUSD,
+        txCount: portfolio.txHistory?.length || 0,
+    };
 
     const [riskProfile, setRiskProfile] = useState('Builder');
     const [loading, setLoading] = useState(false);
@@ -83,50 +116,62 @@ export default function AICopilotPage({ connected, address, stxBalance, sbtcBala
     const [anchoring, setAnchoring] = useState(false);
     const [anchorTxId, setAnchorTxId] = useState(null);
     const [strategyCount, setStrategyCount] = useState(0);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (address) {
-            getStrategyCount(address).then(c => setStrategyCount(Number(c) || 0));
+        if (effectiveAddress) {
+            getStrategyCount(effectiveAddress).then(c => setStrategyCount(Number(c) || 0));
         }
-    }, [address]);
+    }, [effectiveAddress]);
 
     const handleGenerate = async () => {
         setLoading(true);
+        setError(null);
         setStrategy(null);
+        setSections(0); // placeholder clear
         setSections([]);
         setAnchorTxId(null);
 
         try {
             const result = await getAIStrategy({
-                address, stxBalance, sbtcBalance, totalUSD,
-                riskProfile, protocols, strategyCount, txCount
+                address: effectiveAddress,
+                stxBalance: displayData.stxBalance,
+                sbtcBalance: displayData.sbtcBalance,
+                totalUSD: displayData.totalUSD,
+                riskProfile,
+                protocols,
+                strategyCount,
+                txCount: displayData.txCount
             });
             setStrategy(result);
             setSections(parseStrategy(result));
 
-            // Auto-anchor logic
-            setAnchoring(true);
-            const encoder = new TextEncoder();
-            const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(result));
-            const hashHex = Array.from(new Uint8Array(hashBuffer))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('').slice(0, 64);
+            if (!isDemoMode) {
+                // Auto-anchor logic (only if not demo)
+                setAnchoring(true);
+                const encoder = new TextEncoder();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(result));
+                const hashHex = Array.from(new Uint8Array(hashBuffer))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('').slice(0, 64);
 
-            const txId = await anchorStrategy(hashHex, protocols[0]?.name || 'Stacks');
-            if (txId) {
-                setAnchorTxId(txId);
-                const newCount = await getStrategyCount(address);
-                setStrategyCount(Number(newCount) || 0);
+                const txId = await anchorStrategy(hashHex, protocols[0]?.name || 'Stacks');
+                if (txId) {
+                    setAnchorTxId(txId);
+                    const newCount = await getStrategyCount(address);
+                    setStrategyCount(Number(newCount) || 0);
+                }
             }
         } catch (err) {
             console.error(err);
+            setError(err.message || "Failed to generate strategy. Please try again.");
         } finally {
             setLoading(false);
             setAnchoring(false);
         }
     };
 
-    if (!connected) {
+    if (!connected && !isDemoMode) {
         return (
             <div className="max-w-4xl mx-auto py-20 px-4 text-center">
                 <div className="w-20 h-20 bg-orange-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-500/20">
@@ -243,6 +288,11 @@ export default function AICopilotPage({ connected, address, stxBalance, sbtcBala
                                             </a>
                                         )}
                                     </div>
+                                    {error && (
+                                        <div className="mb-6 p-4 bg-red-500/5 border border-red-500/20 rounded-xl text-red-500 text-sm font-bold animate-shake">
+                                            ⚠️ ERROR: {error}
+                                        </div>
+                                    )}
                                     {sections.map((sec, i) => (
                                         <StrategySection
                                             key={i}

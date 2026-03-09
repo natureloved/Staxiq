@@ -14,6 +14,7 @@ import {
 } from '@stacks/blockchain-api-client';
 
 import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
+import { showConnect } from '@stacks/connect';
 
 const CONTRACT_ADDRESS = 'ST9ZZEP9M6VZ9YJA0P69H313CRPV0HQ1ZNPVS8NZ';
 const CONTRACT_NAME = 'staxiq-user-profile';
@@ -24,31 +25,29 @@ function getNetwork() {
         : STACKS_MAINNET;
 }
 
-// ✅ Save risk profile on-chain
+// ✅ Save risk profile on-chain (Wallet Popup)
 export async function saveRiskProfile(riskLevel) {
-    try {
+    return new Promise((resolve) => {
         const riskMap = { Conservative: 1, Balanced: 2, Aggressive: 3 };
         const level = riskMap[riskLevel] || 2;
-        const network = getNetwork();
 
-        const txOptions = {
+        showConnect({
+            appDetails: { name: 'Staxiq', icon: window.location.origin + '/logo.png' },
+            redirectTo: '/',
+            onFinish: (data) => resolve(data.txId),
+            onCancel: () => resolve(null),
+            finished: (data) => resolve(data.txId),
+            userSession: null, // Connect will handle if null
+            sendToEmptyAddress: false,
             contractAddress: CONTRACT_ADDRESS,
             contractName: CONTRACT_NAME,
             functionName: 'set-risk-profile',
             functionArgs: [uintCV(level)],
-            network,
+            network: getNetwork(),
             anchorMode: AnchorMode.Any,
             postConditionMode: PostConditionMode.Allow,
-        };
-
-        const transaction = await makeContractCall(txOptions);
-        const result = await broadcastTransaction({ transaction, network });
-        console.log('✅ Risk profile saved:', result.txid);
-        return result.txid;
-    } catch (err) {
-        console.warn('Risk profile save failed:', err);
-        return null;
-    }
+        });
+    });
 }
 
 // ✅ Read user profile from chain
@@ -86,12 +85,13 @@ export async function checkHasProfile(address) {
     }
 }
 
-// ✅ Anchor strategy on-chain
+// ✅ Anchor strategy on-chain (Wallet Popup)
 export async function anchorStrategy(strategyHash, protocol) {
-    try {
-        const network = getNetwork();
-
-        const txOptions = {
+    return new Promise((resolve) => {
+        showConnect({
+            appDetails: { name: 'Staxiq', icon: window.location.origin + '/logo.png' },
+            onFinish: (data) => resolve(data.txId),
+            onCancel: () => resolve(null),
             contractAddress: CONTRACT_ADDRESS,
             contractName: CONTRACT_NAME,
             functionName: 'save-strategy',
@@ -99,19 +99,11 @@ export async function anchorStrategy(strategyHash, protocol) {
                 stringAsciiCV(strategyHash.slice(0, 64)),
                 stringAsciiCV(protocol.slice(0, 32)),
             ],
-            network,
+            network: getNetwork(),
             anchorMode: AnchorMode.Any,
             postConditionMode: PostConditionMode.Allow,
-        };
-
-        const transaction = await makeContractCall(txOptions);
-        const result = await broadcastTransaction({ transaction, network });
-        console.log('✅ Strategy anchored:', result.txid);
-        return result.txid;
-    } catch (err) {
-        console.warn('Strategy anchoring failed:', err);
-        return null;
-    }
+        });
+    });
 }
 
 // ✅ Get strategy count
