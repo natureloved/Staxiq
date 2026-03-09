@@ -73,7 +73,7 @@ const Navbar = ({ connected, address, connectWallet, disconnectWallet, loading }
                         {/* Network Toggle */}
                         <button
                             onClick={toggleNetwork}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border backdrop-blur-sm shadow-sm hover:scale-105 active:scale-95"
+                            className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[8px] sm:text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border backdrop-blur-sm shadow-sm hover:scale-105 active:scale-95"
                             style={{
                                 backgroundColor: network === 'testnet' ? 'rgba(247, 147, 26, 0.1)' : 'rgba(34, 197, 94, 0.1)',
                                 borderColor: network === 'testnet' ? '#F7931A44' : '#22C55E44',
@@ -81,7 +81,7 @@ const Navbar = ({ connected, address, connectWallet, disconnectWallet, loading }
                             }}
                         >
                             <div
-                                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                                className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full animate-pulse"
                                 style={{ backgroundColor: network === 'testnet' ? '#F7931A' : '#22C55E' }}
                             ></div>
                             {network}
