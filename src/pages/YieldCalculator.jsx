@@ -218,7 +218,7 @@ export default function YieldCalculator({ connected }) {
                                             onError={e => { e.target.style.display = 'none'; }}
                                         />
                                         <span
-                                            className="text-xs font-bold px-2 py-0.5 rounded-full"
+                                            className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
                                             style={{
                                                 background: RISK_COLORS[p.risk].bg,
                                                 color: RISK_COLORS[p.risk].color,
@@ -307,7 +307,7 @@ export default function YieldCalculator({ connected }) {
                                         </p>
                                     </div>
                                     <div
-                                        className="px-3 py-1.5 rounded-full text-xs font-black"
+                                        className="px-2 py-1 rounded-full text-[10px] font-black"
                                         style={{
                                             background: risk.bg,
                                             color: risk.color,
