@@ -36,6 +36,7 @@ function AppContent() {
         address={address}
         connectWallet={connectWallet}
         disconnectWallet={disconnectWallet}
+        loading={loading}
       />
 
       {(!connected && !isDemoMode) && <Hero />}

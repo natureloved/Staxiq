@@ -3,7 +3,7 @@ import WalletConnect from './WalletConnect';
 import PriceTicker from './PriceTicker';
 import { useTheme } from '../context/ThemeContext';
 
-const Navbar = ({ connected, address, connectWallet, disconnectWallet }) => {
+const Navbar = ({ connected, address, connectWallet, disconnectWallet, loading }) => {
     const { isDark, toggleTheme } = useTheme();
 
     return (
@@ -73,6 +73,7 @@ const Navbar = ({ connected, address, connectWallet, disconnectWallet }) => {
                             address={address}
                             connectWallet={connectWallet}
                             disconnectWallet={disconnectWallet}
+                            loading={loading}
                         />
                     </div>
                 </div>

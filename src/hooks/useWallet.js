@@ -1,68 +1,82 @@
-import { useState, useEffect, useMemo } from 'react';
-import { authenticate, AppConfig, UserSession } from '@stacks/connect';
+import { useState, useEffect } from 'react';
+import { showConnect, AppConfig, UserSession } from '@stacks/connect';
+
+// Initialize session outside hook to ensure persistence across renders
+const appConfig = new AppConfig(['store_write', 'publish_data']);
+const userSession = new UserSession({ appConfig });
 
 export function useWallet() {
     const [connected, setConnected] = useState(false);
     const [address, setAddress] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const appConfig = useMemo(() => new AppConfig(['store_write', 'publish_data']), []);
-    const userSession = useMemo(() => new UserSession({ appConfig }), [appConfig]);
-
     const isDev = typeof window !== 'undefined' &&
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-    const getStxAddress = (userData) => {
-        return isDev
-            ? userData?.profile?.stxAddress?.testnet
-            : userData?.profile?.stxAddress?.mainnet;
+    const getStxAddress = (session) => {
+        if (!session.isUserSignedIn()) return null;
+        try {
+            const userData = session.loadUserData();
+            return isDev
+                ? userData?.profile?.stxAddress?.testnet
+                : userData?.profile?.stxAddress?.mainnet;
+        } catch (e) {
+            console.error('Error loading STX address:', e);
+            return null;
+        }
     };
 
     // Restore session on mount
     useEffect(() => {
         if (userSession.isUserSignedIn()) {
-            const userData = userSession.loadUserData();
-            const addr = getStxAddress(userData);
+            const addr = getStxAddress(userSession);
             if (addr) {
                 setAddress(addr);
                 setConnected(true);
             }
         }
-    }, [userSession]);
+    }, []);
 
     function connectWallet() {
+        if (loading) return;
         setLoading(true);
 
-        authenticate({
-            appDetails: {
-                name: 'Staxiq',
-                icon: window.location.origin + '/favicon.ico',
-            },
-            userSession,
-            onFinish: ({ userSession: session }) => {
-                try {
-                    const userData = session.loadUserData();
-                    const addr = getStxAddress(userData);
+        try {
+            showConnect({
+                userSession,
+                appDetails: {
+                    name: 'Staxiq',
+                    icon: window.location.origin + '/favicon.ico',
+                },
+                onFinish: () => {
+                    const addr = getStxAddress(userSession);
                     if (addr) {
                         setAddress(addr);
                         setConnected(true);
                     }
-                } catch (err) {
-                    console.error('Error reading wallet data:', err);
-                } finally {
                     setLoading(false);
-                }
-            },
-            onCancel: () => {
-                setLoading(false);
-            },
-        });
+                    // Force a small delay then reload to ensure all contexts sync with localStorage
+                    setTimeout(() => window.location.reload(), 100);
+                },
+                onCancel: () => {
+                    setLoading(false);
+                },
+            });
+        } catch (err) {
+            console.error('Wallet connection initiation failed:', err);
+            setLoading(false);
+        }
     }
 
     function disconnectWallet() {
-        try { userSession.signUserOut(); } catch { }
-        setConnected(false);
-        setAddress(null);
+        try {
+            userSession.signUserOut();
+            setConnected(false);
+            setAddress(null);
+            window.location.reload();
+        } catch (err) {
+            console.error('Logout error:', err);
+        }
     }
 
     function shortAddress(addr) {
@@ -70,5 +84,12 @@ export function useWallet() {
         return `${addr.slice(0, 5)}...${addr.slice(-4)}`;
     }
 
-    return { connected, address, shortAddress, connectWallet, disconnectWallet, loading };
+    return {
+        connected,
+        address,
+        shortAddress,
+        connectWallet,
+        disconnectWallet,
+        loading
+    };
 }
