@@ -117,5 +117,13 @@ ${isNewUser ? `
     }
 
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+    const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!result) {
+        console.error('Gemini API returned no content:', data);
+        throw new Error('AI returned an empty response. Please try a different risk profile.');
+    }
+
+    console.log('AI Strategy Generated successfully');
+    return result;
 }

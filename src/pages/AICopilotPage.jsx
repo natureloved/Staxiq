@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useProtocolData } from '../hooks/useProtocolData';
 import { getAIStrategy } from '../services/aiService';
@@ -117,6 +117,7 @@ export default function AICopilotPage({ connected, address }) {
     const [anchorTxId, setAnchorTxId] = useState(null);
     const [strategyCount, setStrategyCount] = useState(0);
     const [error, setError] = useState(null);
+    const resultRef = useRef(null);
 
     useEffect(() => {
         if (effectiveAddress) {
@@ -128,7 +129,6 @@ export default function AICopilotPage({ connected, address }) {
         setLoading(true);
         setError(null);
         setStrategy(null);
-        setSections(0); // placeholder clear
         setSections([]);
         setAnchorTxId(null);
 
@@ -145,6 +145,11 @@ export default function AICopilotPage({ connected, address }) {
             });
             setStrategy(result);
             setSections(parseStrategy(result));
+
+            // Auto-scroll to results
+            setTimeout(() => {
+                resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
 
             if (!isDemoMode) {
                 // Auto-anchor logic (only if not demo)
@@ -164,7 +169,15 @@ export default function AICopilotPage({ connected, address }) {
             }
         } catch (err) {
             console.error(err);
-            setError(err.message || "Failed to generate strategy. Please try again.");
+            const msg = err.message || "AI Analysis offline. Using regional heuristics...";
+            setError(msg);
+
+            if (isDemoMode) {
+                // Fallback to local demo strategy so it never stays blank
+                const { DEMO_STRATEGY } = await import('../data/demoData');
+                setStrategy(DEMO_STRATEGY);
+                setSections(parseStrategy(DEMO_STRATEGY));
+            }
         } finally {
             setLoading(false);
             setAnchoring(false);
@@ -250,7 +263,7 @@ export default function AICopilotPage({ connected, address }) {
                 </div>
 
                 {/* Right Area - Terminal Output */}
-                <div className="lg:col-span-8">
+                <div className="lg:col-span-8" ref={resultRef}>
                     <div className="dark:bg-[#0d1117] bg-white border dark:border-[#1e2d4a] border-gray-200 rounded-2xl min-h-[600px] flex flex-col shadow-2xl overflow-hidden">
                         {/* Terminal Header */}
                         <div className="px-6 py-4 border-b dark:border-[#1e2d4a] border-gray-100 flex items-center justify-between bg-gray-50/50 dark:bg-transparent">
@@ -266,6 +279,16 @@ export default function AICopilotPage({ connected, address }) {
 
                         {/* Output area */}
                         <div className="flex-1 p-8 overflow-y-auto font-sans">
+                            {error && (
+                                <div className="mb-6 p-4 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500 text-xs font-mono animate-shake flex items-start gap-3">
+                                    <span className="mt-0.5">⚠️</span>
+                                    <div>
+                                        <p className="font-bold uppercase tracking-widest mb-1">Terminal Error</p>
+                                        <p className="opacity-80">{error}</p>
+                                    </div>
+                                </div>
+                            )}
+
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center h-full gap-4">
                                     <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin"></div>
@@ -288,11 +311,6 @@ export default function AICopilotPage({ connected, address }) {
                                             </a>
                                         )}
                                     </div>
-                                    {error && (
-                                        <div className="mb-6 p-4 bg-red-500/5 border border-red-500/20 rounded-xl text-red-500 text-sm font-bold animate-shake">
-                                            ⚠️ ERROR: {error}
-                                        </div>
-                                    )}
                                     {sections.map((sec, i) => (
                                         <StrategySection
                                             key={i}
