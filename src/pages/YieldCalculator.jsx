@@ -263,7 +263,7 @@ export default function YieldCalculator({ connected }) {
                         </div>
                         <button
                             onClick={() => setCompound(c => !c)}
-                            className="relative w-12 h-6 rounded-full transition-all duration-300"
+                            className="relative w-10 h-5 sm:w-12 sm:h-6 rounded-full transition-all duration-300"
                             style={{
                                 background: compound
                                     ? 'linear-gradient(135deg, #F7931A, #e8820a)'
@@ -271,8 +271,8 @@ export default function YieldCalculator({ connected }) {
                             }}
                         >
                             <span
-                                className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all duration-300"
-                                style={{ left: compound ? '1.375rem' : '0.125rem' }}
+                                className="absolute top-0.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white transition-all duration-300"
+                                style={{ left: compound ? (window.innerWidth < 640 ? '1.375rem' : '1.625rem') : '0.125rem' }}
                             />
                         </button>
                     </div>
