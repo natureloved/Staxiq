@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { showConnect, AppConfig, UserSession } from '@stacks/connect';
+import { authenticate, AppConfig, UserSession } from '@stacks/connect'; // ✅ authenticate, not showConnect
 
-// Initialize session outside hook to ensure persistence across renders
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
 
@@ -13,10 +12,8 @@ export function useWallet() {
     const isDev = typeof window !== 'undefined' &&
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-    const getStxAddress = (session) => {
-        if (!session.isUserSignedIn()) return null;
+    const getStxAddress = (userData) => {
         try {
-            const userData = session.loadUserData();
             return isDev
                 ? userData?.profile?.stxAddress?.testnet
                 : userData?.profile?.stxAddress?.mainnet;
@@ -26,10 +23,10 @@ export function useWallet() {
         }
     };
 
-    // Restore session on mount
     useEffect(() => {
         if (userSession.isUserSignedIn()) {
-            const addr = getStxAddress(userSession);
+            const userData = userSession.loadUserData();
+            const addr = getStxAddress(userData);
             if (addr) {
                 setAddress(addr);
                 setConnected(true);
@@ -41,42 +38,40 @@ export function useWallet() {
         if (loading) return;
         setLoading(true);
 
-        try {
-            showConnect({
-                userSession,
-                appDetails: {
-                    name: 'Staxiq',
-                    icon: window.location.origin + '/favicon.ico',
-                },
-                onFinish: () => {
-                    const addr = getStxAddress(userSession);
+        authenticate({
+            userSession,
+            appDetails: {
+                name: 'Staxiq',
+                icon: window.location.origin + '/favicon.ico',
+            },
+            onFinish: ({ userSession: session }) => {  // ✅ read from payload
+                try {
+                    const userData = session.loadUserData();
+                    const addr = getStxAddress(userData);
                     if (addr) {
                         setAddress(addr);
                         setConnected(true);
                     }
+                } catch (err) {
+                    console.error('Error reading wallet data:', err);
+                } finally {
                     setLoading(false);
-                    // Force a small delay then reload to ensure all contexts sync with localStorage
-                    setTimeout(() => window.location.reload(), 100);
-                },
-                onCancel: () => {
-                    setLoading(false);
-                },
-            });
-        } catch (err) {
-            console.error('Wallet connection initiation failed:', err);
-            setLoading(false);
-        }
+                }
+            },
+            onCancel: () => {
+                setLoading(false);
+            },
+        });
     }
 
     function disconnectWallet() {
         try {
             userSession.signUserOut();
-            setConnected(false);
-            setAddress(null);
-            window.location.reload();
         } catch (err) {
             console.error('Logout error:', err);
         }
+        setConnected(false);
+        setAddress(null);
     }
 
     function shortAddress(addr) {
@@ -84,12 +79,5 @@ export function useWallet() {
         return `${addr.slice(0, 5)}...${addr.slice(-4)}`;
     }
 
-    return {
-        connected,
-        address,
-        shortAddress,
-        connectWallet,
-        disconnectWallet,
-        loading
-    };
+    return { connected, address, shortAddress, connectWallet, disconnectWallet, loading };
 }
