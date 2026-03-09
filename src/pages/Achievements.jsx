@@ -203,7 +203,7 @@ export default function Achievements({ connected, address }) {
             {earned.length > 0 && (
                 <div>
                     <h2
-                        className="font-bold text-lg mb-4"
+                        className="font-black text-lg mb-4"
                         style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
                     >
                         Earned ({earned.length})
@@ -229,7 +229,7 @@ export default function Achievements({ connected, address }) {
                                     {badge.icon}
                                 </div>
                                 <p
-                                    className="font-display font-bold text-sm mb-1"
+                                    className="font-display font-black text-sm mb-1"
                                     style={{ color: badge.color }}
                                 >
                                     {badge.title}
@@ -250,7 +250,7 @@ export default function Achievements({ connected, address }) {
             {locked.length > 0 && (
                 <div>
                     <h2
-                        className="font-bold text-lg mb-4"
+                        className="font-black text-lg mb-4"
                         style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
                     >
                         Locked ({locked.length})
@@ -276,7 +276,7 @@ export default function Achievements({ connected, address }) {
                                     {badge.icon}
                                 </div>
                                 <p
-                                    className="font-display font-bold text-sm mb-1"
+                                    className="font-display font-black text-sm mb-1"
                                     style={{ color: s('muted') }}
                                 >
                                     {badge.title}

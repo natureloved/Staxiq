@@ -151,7 +151,7 @@ export default function YieldCalculator({ connected }) {
                                 type="number"
                                 value={amount}
                                 onChange={e => setAmount(e.target.value)}
-                                className="flex-1 px-4 py-3 text-lg font-mono font-bold outline-none"
+                                className="flex-1 px-2 sm:px-4 py-2 sm:py-3 text-sm sm:text-lg font-mono font-bold outline-none min-w-0"
                                 style={{
                                     background: s('card'),
                                     color: s('text'),
@@ -160,12 +160,12 @@ export default function YieldCalculator({ connected }) {
                                 placeholder="0.00"
                                 min="0"
                             />
-                            <div className="flex">
+                            <div className="flex flex-shrink-0">
                                 {['STX', 'sBTC'].map(a => (
                                     <button
                                         key={a}
                                         onClick={() => setAsset(a)}
-                                        className="px-4 py-3 text-sm font-bold transition-all"
+                                        className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold transition-all whitespace-nowrap"
                                         style={{
                                             background: asset === a
                                                 ? 'linear-gradient(135deg, #F7931A, #e8820a)'

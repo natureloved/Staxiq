@@ -33,8 +33,8 @@ export default function Footer() {
                 {/* Links */}
                 <div className="flex items-center justify-center gap-6 mb-6 flex-wrap">
                     {[
-                        { label: 'Stacks Explorer ↗', href: '#' },
-                        { label: 'Docs ↗', href: '#' },
+                        { label: 'Stacks Explorer →', href: '#' },
+                        { label: 'Docs →', href: '#' },
                     ].map((link, i) => (
                         <a
                             key={i}

@@ -25,19 +25,25 @@ const WalletConnect = ({ connected, address, connectWallet, disconnectWallet, lo
                     ) : 'Connect Wallet'}
                 </button>
             ) : (
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 bg-orange-500 px-2.5 py-1 rounded-lg">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+                <div className="flex items-center gap-2">
+                    <div
+                        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
+                        style={{ background: 'linear-gradient(135deg, #22c55e22, #22c55e11)', border: '1px solid #22c55e44' }}
+                    >
+                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" style={{ boxShadow: '0 0 6px rgba(34,197,94,0.8)' }} />
+                        <span className="text-green-400 text-xs font-bold hidden sm:inline">Connected</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-orange-500 px-2.5 py-1.5 rounded-lg">
                         <span className="text-white text-xs font-mono font-bold">
                             {shortAddress(address)}
                         </span>
                     </div>
                     <button
                         onClick={disconnectWallet}
-                        className="text-[#4a5a7a] hover:text-red-400 p-1.5 rounded-lg hover:bg-red-400/10 transition-all duration-200 group"
+                        className="text-[#4a5a7a] hover:text-red-400 p-1.5 rounded-lg hover:bg-red-400/10 transition-all duration-200 group flex-shrink-0"
                         title="Disconnect Wallet"
                     >
-                        <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                     </button>

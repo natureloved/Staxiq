@@ -161,14 +161,14 @@ export default function WalletProtocols({ address, demoProtocols }) {
                                 <img
                                     src={PROTOCOL_LOGOS[protocol.id] ?? ''}
                                     alt={protocol.name}
-                                    className="w-6 h-6 object-contain"
+                                    className="w-full h-full object-contain p-0.5"
                                     onError={e => {
                                         e.target.style.display = 'none';
-                                        e.target.nextSibling.style.display = 'block';
+                                        e.target.nextSibling.style.display = 'flex';
                                     }}
                                 />
                                 <span
-                                    style={{ display: 'none', color: protocol.color }}
+                                    style={{ display: 'none', color: protocol.color, alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '11px', fontWeight: 900 }}
                                 >
                                     {protocol.name.slice(0, 2).toUpperCase()}
                                 </span>

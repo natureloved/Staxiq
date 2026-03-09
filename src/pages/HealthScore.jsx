@@ -276,7 +276,7 @@ export default function HealthScore({ connected, address }) {
                                 className="font-display font-bold text-base mb-4 flex items-center gap-2"
                                 style={{ color: s('text') }}
                             >
-                                <span>✅</span> What's Working Well
+                                Wallet Summary
                             </h2>
                             <div className="space-y-2">
                                 {wins.map((win, i) => (
@@ -288,7 +288,6 @@ export default function HealthScore({ connected, address }) {
                                             border: '1px solid #22c55e33',
                                         }}
                                     >
-                                        <span className="text-green-400">✓</span>
                                         <p
                                             className="text-sm font-semibold"
                                             style={{ color: s('text') }}
