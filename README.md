@@ -1,6 +1,6 @@
 # Staxiq - Bitcoin DeFi Intelligence on Stacks
 
-**Staxiq** is a professional-grade Bitcoin DeFi dashboard and AI Copilot built natively on the Stacks L2 blockchain. It provides real-time insights, yield optimization, and portfolio management for Bitcoin-integrated DeFi protocols.
+**Staxiq** Staxiq is an AI-powered Bitcoin DeFi aggregator built natively on the Stacks blockchain. It gives STX and sBTC holders a single dashboard to track all their DeFi positions, compare protocol yields, assess portfolio risk, and receive personalized AI-generated strategies — all anchored on Bitcoin via Stacks smart contracts.
 
 ![Staxiq Dashboard](https://raw.githubusercontent.com/natureloved/Staxiq/main/public/banner.png) *(Placeholder banner)*
 
