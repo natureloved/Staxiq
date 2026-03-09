@@ -19,7 +19,7 @@ import Achievements from './pages/Achievements';
 
 function AppContent() {
   const { isDark } = useTheme();
-  const { connected, address, connectWallet, disconnectWallet } = useWallet();
+  const { connected, address, connectWallet, disconnectWallet, loading } = useWallet();
 
   const { isDemoMode } = useDemo();
 
