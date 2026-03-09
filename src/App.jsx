@@ -9,7 +9,7 @@ import DashboardLayout from './components/DashboardLayout';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
 
-import Overview from './pages/Overview';
+import Overview from './pages/Dashboard';
 import YieldCalculator from './pages/YieldCalculator';
 import StackingTracker from './pages/StackingTracker';
 import HealthScore from './pages/HealthScore';
