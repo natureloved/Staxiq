@@ -86,21 +86,11 @@ export default function MobileNav() {
                     })}
                 >
                     {({ isActive }) => (
-                        <>
-                            <div style={{
-                                color: isActive ? '#F7931A' : isDark ? '#4a5a7a' : '#94a3b8',
-                            }}>
-                                {NAV_ICONS[item.path]}
-                            </div>
-                            <span style={{
-                                fontSize: '9px',
-                                fontWeight: 700,
-                                letterSpacing: '0.03em',
-                                color: isActive ? '#F7931A' : isDark ? '#4a5a7a' : '#94a3b8',
-                            }}>
-                                {item.label}
-                            </span>
-                        </>
+                        <div style={{
+                            color: isActive ? '#F7931A' : isDark ? '#4a5a7a' : '#94a3b8',
+                        }}>
+                            {NAV_ICONS[item.path]}
+                        </div>
                     )}
                 </NavLink>
             ))}
