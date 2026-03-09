@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const WalletConnect = ({ connected, address, connectWallet, disconnectWallet, loading }) => {
+    const [isMobile, setIsMobile] = useState(false);
+    const [hasProvider, setHasProvider] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setIsMobile(checkMobile);
+        setHasProvider(!!window.StacksProvider || !!window.LeatherProvider);
+    }, []);
+
     function shortAddress(addr) {
         if (!addr) return '';
         return `${addr.slice(0, 5)}...${addr.slice(-4)}`;
@@ -9,21 +18,30 @@ const WalletConnect = ({ connected, address, connectWallet, disconnectWallet, lo
     return (
         <div className="flex items-center gap-3">
             {!connected ? (
-                <button
-                    onClick={connectWallet}
-                    disabled={loading}
-                    className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-all duration-200"
-                >
-                    {loading ? (
-                        <span className="flex items-center gap-2">
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            Connecting...
-                        </span>
-                    ) : 'Connect Wallet'}
-                </button>
+                <div className="flex flex-col gap-2">
+                    <button
+                        onClick={connectWallet}
+                        disabled={loading}
+                        className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-black px-5 py-2 rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/20 active:scale-95"
+                    >
+                        {loading ? (
+                            <span className="flex items-center gap-2">
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
+                                Connecting...
+                            </span>
+                        ) : 'Connect Wallet'}
+                    </button>
+
+                    {isMobile && !hasProvider && !loading && (
+                        <div className="flex items-center justify-center gap-4 mt-1 opacity-80">
+                            <a href="https://www.xverse.app/download" target="_blank" className="text-[10px] font-bold text-gray-400 hover:text-white transition-colors">Get Xverse</a>
+                            <a href="https://leather.io/install-extension" target="_blank" className="text-[10px] font-bold text-gray-400 hover:text-white transition-colors">Get Leather</a>
+                        </div>
+                    )}
+                </div>
             ) : (
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1.5 bg-orange-500 px-2.5 py-1.5 rounded-lg">

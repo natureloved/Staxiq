@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { authenticate, AppConfig, UserSession } from '@stacks/connect';
+import { authenticate, showConnect, AppConfig, UserSession } from '@stacks/connect';
 import { useNetwork } from '../context/NetworkContext';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
@@ -32,26 +32,22 @@ export function useWallet() {
         if (loading) return;
         setLoading(true);
 
-        authenticate({
+        showConnect({
             userSession,
             appDetails: {
                 name: 'Staxiq',
-                icon: window.location.origin + '/favicon.ico',
+                icon: window.location.origin + '/logo.png',
             },
             onFinish: (payload) => {
                 const userData = payload.userSession.loadUserData();
                 const addr = getStxAddress(userData);
 
                 console.log('Authentication successful');
-                console.log('isSignedIn:', payload.userSession.isUserSignedIn());
-
                 if (addr) {
                     setAddress(addr);
                     setConnected(true);
                 }
                 setLoading(false);
-                // Optional: reload to ensure all components reactive to localStorage sync
-                // window.location.reload(); 
             },
             onCancel: () => {
                 setLoading(false);
