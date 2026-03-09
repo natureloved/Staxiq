@@ -144,15 +144,31 @@ export default function Overview({ connected, address }) {
                 />
             )}
 
-            <AICopilot
-                connected={connected || isDemoMode}
-                address={effectiveAddress}
-                stxBalance={displayData.stxBalance}
-                sbtcBalance={displayData.sbtcBalance}
-                totalUSD={displayData.totalUSD}
-                txCount={displayData.txCount}
-                demoStrategy={isDemoMode ? DEMO_STRATEGY : null}
-            />
+            {/* AI Intelligence Terminal Promotion */}
+            <div
+                className="rounded-2xl p-6 mb-6 cursor-pointer border transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                onClick={() => window.location.href = '/copilot'}
+                style={{
+                    background: isDark ? 'linear-gradient(135deg, #3B82F622, #0d1117)' : 'linear-gradient(135deg, #3B82F611, #ffffff)',
+                    borderColor: isDark ? '#3B82F644' : '#3B82F633',
+                }}
+            >
+                <div className="flex items-center justify-between gap-4 text-left">
+                    <div className="flex items-center gap-4 text-left">
+                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-2xl border border-blue-500/20">
+                            🤖
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg dark:text-white">AI Intelligence Terminal</h3>
+                            <p className="text-sm dark:text-gray-400">Deep-dive into personalized Stacks DeFi strategies anchored on Bitcoin.</p>
+                        </div>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-500/20">
+                        Access Console
+                        <span>→</span>
+                    </div>
+                </div>
+            </div>
             {(connected || isDemoMode) && (
                 <RecentTransactions address={effectiveAddress} />
             )}
