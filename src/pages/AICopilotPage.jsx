@@ -72,7 +72,7 @@ function StrategySection({ heading, body, isDark, isLast, headingColor }) {
                     return (
                         <p
                             key={i}
-                            className="text-sm leading-relaxed"
+                            className="text-sm leading-relaxed break-words"
                             style={{
                                 color: isDark ? '#c8d8f0' : '#4a5a7a',
                                 borderLeft: isStep ? `2px solid ${headingColor}44` : 'none',
@@ -279,7 +279,7 @@ export default function AICopilotPage({ connected, address }) {
 
                         {/* Output area */}
                         <div className="flex-1 p-8 overflow-y-auto font-sans">
-                            {error && (
+                            {error && !isDemoMode && (
                                 <div className="mb-6 p-4 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500 text-xs font-mono animate-shake flex items-start gap-3">
                                     <span className="mt-0.5">⚠️</span>
                                     <div>

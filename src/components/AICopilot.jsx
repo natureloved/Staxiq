@@ -80,7 +80,7 @@ function StrategySection({ heading, body, isDark, isLast, headingColor }) {
                     return (
                         <p
                             key={i}
-                            className="text-sm leading-relaxed"
+                            className="text-sm leading-relaxed break-words"
                             style={{
                                 color: isDark ? '#c8d8f0' : '#334155',
                                 borderLeft: isStep ? `2px solid ${headingColor}44` : 'none',
@@ -348,7 +348,7 @@ export default function AICopilot({ connected, address, stxBalance, sbtcBalance,
             </div>
 
             {/* Error */}
-            {error && (
+            {error && !demoStrategy && (
                 <div
                     className="rounded-xl px-4 py-3 text-sm"
                     style={{
