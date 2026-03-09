@@ -32,17 +32,30 @@ export function useWallet() {
         if (loading) return;
         setLoading(true);
 
-        showConnect({
+        console.log('Starting authentication flow...');
+
+        authenticate({
             userSession,
             appDetails: {
                 name: 'Staxiq',
                 icon: window.location.origin + '/logo.png',
             },
             onFinish: (payload) => {
+                console.log('onFinish triggered');
+                const userData = userSession.loadUserData();
+                const addr = getStxAddress(userData);
+
+                if (addr) {
+                    setAddress(addr);
+                    setConnected(true);
+                }
+                setLoading(false);
+            },
+            finished: (payload) => {
+                console.log('finished triggered');
                 const userData = payload.userSession.loadUserData();
                 const addr = getStxAddress(userData);
 
-                console.log('Authentication successful');
                 if (addr) {
                     setAddress(addr);
                     setConnected(true);
@@ -50,6 +63,7 @@ export function useWallet() {
                 setLoading(false);
             },
             onCancel: () => {
+                console.log('Authentication cancelled');
                 setLoading(false);
             },
         });
