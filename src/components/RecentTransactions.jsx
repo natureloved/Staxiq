@@ -129,10 +129,10 @@ export default function RecentTransactions({ address }) {
                         href={`https://explorer.hiro.so/address/${address}?chain=${address?.startsWith('ST') ? 'testnet' : 'mainnet'}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-bold transition-colors"
+                        className="text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-1"
                         style={{ color: '#3B82F6' }}
                     >
-                        View all ↗
+                        View all →
                     </a>
                 )}
             </div>
