@@ -34,7 +34,7 @@ export default function Footer() {
                 <div className="flex items-center justify-center gap-6 mb-6 flex-wrap">
                     {[
                         { label: 'Stacks Explorer →', href: 'https://explorer.hiro.so/' },
-                        { label: 'Docs →', href: '#' },
+                        { label: 'Docs →', href: 'https://natureloved-staxiq-48.mintlify.app/' },
                     ].map((link, i) => (
                         <a
                             key={i}
