@@ -12,7 +12,7 @@ import {
 } from '@stacks/blockchain-api-client';
 
 import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
-import { showConnect } from '@stacks/connect';
+import { openContractCall } from '@stacks/connect';
 
 const CONTRACT_ADDRESS = 'ST9ZZEP9M6VZ9YJA0P69H313CRPV0HQ1ZNPVS8NZ';
 const CONTRACT_NAME = 'staxiq-user-profile';
