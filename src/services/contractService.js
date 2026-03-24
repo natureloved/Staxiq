@@ -29,7 +29,7 @@ export async function saveRiskProfile(riskLevel) {
         const riskMap = { HODLer: 1, Builder: 2, Degen: 3 };
         const level = riskMap[riskLevel] || 2;
 
-        showConnect({
+        openContractCall({
             appDetails: { name: 'Staxiq', icon: window.location.origin + '/logo.png' },
             redirectTo: '/',
             onFinish: (data) => resolve(data.txId),
@@ -86,7 +86,7 @@ export async function checkHasProfile(address) {
 // ✅ Anchor strategy on-chain (Wallet Popup)
 export async function anchorStrategy(strategyHash, protocol) {
     return new Promise((resolve) => {
-        showConnect({
+        openContractCall({
             appDetails: { name: 'Staxiq', icon: window.location.origin + '/logo.png' },
             onFinish: (data) => resolve(data.txId),
             onCancel: () => resolve(null),
