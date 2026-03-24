@@ -111,7 +111,7 @@ ${isNewUser ? `
                 'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-                model: 'claude-3-haiku-20240307',
+                model: 'claude-3-opus-20240229',
                 max_tokens: 1500,
                 temperature: 0.7,
                 messages: [{ role: 'user', content: prompt }]
