@@ -11,9 +11,9 @@ export async function getAIStrategy({
     const isDev = window.location.hostname === 'localhost' ||
         window.location.hostname === '127.0.0.1';
 
-    // Gemini API works directly in production (Vercel)
-    // Uses local proxy only in development
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`;
+    // Claude API via Anthropic Messages API
+    // Note: Calling Anthropic directly from the frontend requires 'anthropic-dangerous-direct-browser-access': 'true'
+    const apiUrl = 'https://api.anthropic.com/v1/messages';
 
     const isNewUser = strategyCount === 0 && txCount < 3;
     const isExperienced = strategyCount > 5 || txCount > 20;
@@ -96,7 +96,7 @@ ${isNewUser ? `
 🚀 EXECUTE NOW: [Specific next action with protocol name]
 `}`;
 
-    console.log('API Key present:', !!import.meta.env.VITE_GEMINI_API_KEY);
+    console.log('API Key present:', !!import.meta.env.VITE_CLAUDE_API_KEY);
     console.log('Risk profile:', riskProfile);
     console.log('Address:', address);
 
@@ -104,13 +104,17 @@ ${isNewUser ? `
         apiUrl,
         {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': import.meta.env.VITE_CLAUDE_API_KEY,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
+            },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 1500,
-                },
+                model: 'claude-3-5-sonnet-20241022',
+                max_tokens: 1500,
+                temperature: 0.7,
+                messages: [{ role: 'user', content: prompt }]
             }),
         }
     );
@@ -121,10 +125,10 @@ ${isNewUser ? `
     }
 
     const data = await response.json();
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const result = data.content?.[0]?.text;
 
     if (!result) {
-        console.error('Gemini API returned no content:', data);
+        console.error('Claude API returned no content:', data);
         throw new Error('AI returned an empty response. Please try a different risk profile.');
     }
 
