@@ -1,8 +1,6 @@
-// contractService.js - correct imports for latest @stacks/transactions
 import {
     makeContractCall,
-    stringAsciiCV,
-    uintCV,
+    Cl,
     AnchorMode,
     PostConditionMode,
     broadcastTransaction,
@@ -42,7 +40,7 @@ export async function saveRiskProfile(riskLevel) {
             contractAddress: CONTRACT_ADDRESS,
             contractName: CONTRACT_NAME,
             functionName: 'set-risk-profile',
-            functionArgs: [uintCV(level)],
+            functionArgs: [Cl.uint(level)],
             network: getNetwork(),
             anchorMode: AnchorMode.Any,
             postConditionMode: PostConditionMode.Allow,
@@ -96,8 +94,8 @@ export async function anchorStrategy(strategyHash, protocol) {
             contractName: CONTRACT_NAME,
             functionName: 'save-strategy',
             functionArgs: [
-                stringAsciiCV(strategyHash.slice(0, 64)),
-                stringAsciiCV(protocol.slice(0, 32)),
+                Cl.stringAscii(strategyHash.slice(0, 64)),
+                Cl.stringAscii(protocol.slice(0, 32)),
             ],
             network: getNetwork(),
             anchorMode: AnchorMode.Any,

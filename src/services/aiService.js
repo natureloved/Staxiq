@@ -125,7 +125,7 @@ ${isNewUser ? `
     }
 
     const data = await response.json();
-    const result = data.content?.[0]?.text;
+    const result = data.content?.[0]?.text?.replace(/\*/g, '');
 
     if (!result) {
         console.error('Claude API returned no content:', data);
