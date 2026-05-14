@@ -32,6 +32,7 @@
 import { TTL } from '../cache.js';
 
 const DEFILLAMA_PROTOCOL_API = 'https://api.llama.fi/protocol/granite';
+const DEFILLAMA_YIELDS_API = 'https://yields.llama.fi/pools';
 
 /** @type {import('../types.js').ProtocolMeta} */
 const meta = {
@@ -72,13 +73,41 @@ async function fetchProtocolInfo(ctx) {
 
 /** @type {import('../types.js').ProtocolAdapter['fetchYields']} */
 async function fetchYields(ctx) {
-  // Coming in v0.3: full Stacks Clarity on-chain reader
-  return [];
+  return ctx.cache.wrap('yields:granite', TTL.YIELDS_MS, async () => {
+    try {
+      const res = await ctx.fetch(DEFILLAMA_YIELDS_API);
+      if (!res.ok) throw new Error(`DefiLlama yields HTTP ${res.status}`);
+      const data = await res.json();
+
+      const pools = (data.data || []).filter(
+        (p) => p.project === 'granite' && p.chain === 'Stacks',
+      );
+      if (pools.length === 0) return [];
+
+      const asOf = new Date().toISOString();
+      return pools.map((pool) => ({
+        id: `granite:${pool.pool}`,
+        protocolSlug: 'granite',
+        label: pool.symbol ? `${pool.symbol} supply` : 'Supply',
+        kind: 'lending',
+        asset: pool.symbol || 'UNKNOWN',
+        apyBase: pool.apyBase != null ? (pool.apyBase / 100).toFixed(4) : '0',
+        apyTotal: pool.apy != null ? (pool.apy / 100).toFixed(4) : '0',
+        tvlUsd: pool.tvlUsd != null ? pool.tvlUsd.toFixed(2) : '0',
+        risk: meta.risk,
+        sourceUrl: 'https://yields.llama.fi',
+        asOf,
+      }));
+    } catch (e) {
+      ctx.log('granite: yield fetch failed', { err: String(e) });
+      return [];
+    }
+  });
 }
 
 /** @type {import('../types.js').ProtocolAdapter['fetchUserPositions']} */
-async function fetchUserPositions(ctx, address) {
-  // Coming in v0.3: full Stacks Clarity on-chain reader
+async function fetchUserPositions(_ctx, _address) {
+  // On-chain position reader landing in v0.3
   return [];
 }
 
@@ -105,44 +134,3 @@ export const graniteAdapter = {
   fetchTvl,
 };
 
-// ---------- helpers ----------
-
-/**
- * @param {unknown} v
- * @returns {string}
- */
-function toDecimalString(v) {
-  if (v === null || v === undefined || v === '') return '0';
-  const n = Number(v);
-  if (!Number.isFinite(n)) return '0';
-  return n > 1.5 ? (n / 100).toFixed(8) : n.toFixed(8);
-}
-
-/**
- * @param {unknown} a
- * @param {unknown} b
- * @returns {string}
- */
-function addDecimals(a, b) {
-  return (Number(toDecimalString(a)) + Number(toDecimalString(b))).toFixed(8);
-}
-
-/**
- * Convert LTV pair to a health-factor-like figure.
- *   currentLtv = debt / collateral (decimal, e.g. 0.55)
- *   liquidationLtv = max allowed before liquidation (e.g. 0.75)
- *   HF = liquidationLtv / currentLtv → >1 safe, =1 imminent liquidation
- *
- * @param {unknown} currentLtv
- * @param {unknown} liquidationLtv
- * @returns {string}
- */
-function computeHealthFromLtv(currentLtv, liquidationLtv) {
-  const cur = Number(currentLtv);
-  const liq = Number(liquidationLtv);
-  if (!Number.isFinite(cur) || !Number.isFinite(liq) || cur <= 0) {
-    // No debt or unreadable values — treat as healthy.
-    return '999';
-  }
-  return (liq / cur).toFixed(4);
-}

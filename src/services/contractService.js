@@ -14,8 +14,8 @@ import {
 import { createNetwork } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
 
-const CONTRACT_ADDRESS = 'ST9ZZEP9M6VZ9YJA0P69H313CRPV0HQ1ZNPVS8NZ';
-const CONTRACT_NAME = 'staxiq-user-profile';
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || 'ST9ZZEP9M6VZ9YJA0P69H313CRPV0HQ1ZNPVS8NZ';
+const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME || 'staxiq-user-profile';
 
 function getNetwork() {
     return createNetwork(

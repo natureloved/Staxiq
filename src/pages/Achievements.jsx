@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { usePortfolio } from '../hooks/usePortfolio';
 
 const ALL_BADGES = [
     {
@@ -100,27 +101,59 @@ const ALL_BADGES = [
     },
 ];
 
+function loadAchievementFlags() {
+    try {
+        return JSON.parse(localStorage.getItem('staxiq:achievements') || '{}');
+    } catch {
+        return {};
+    }
+}
+
 export default function Achievements({ connected, address }) {
     const { isDark } = useTheme();
-    const [userData] = useState({
-        connected: true,
-        strategyCount: 3,
-        pagesVisited: 5,
-        sbtcBalance: '0.0000',
-        riskProfile: 'Builder',
-        usedCalculator: true,
-        usedStacking: true,
-        usedHealth: true,
-        usedCompare: true,
-        totalUSD: 128.95,
-        badgeCount: 0,
-    });
+    const { portfolio } = usePortfolio(connected ? address : null);
 
-    const earned = ALL_BADGES.filter(b => b.condition({
+    const [flags, setFlags] = useState(loadAchievementFlags);
+
+    // Re-read localStorage whenever the page becomes visible (catches flags set
+    // by other pages like YieldCalculator, StackingTracker, etc.)
+    useEffect(() => {
+        const onFocus = () => setFlags(loadAchievementFlags());
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
+    }, []);
+
+    // Mark this page itself as visited
+    useEffect(() => {
+        const updated = { ...loadAchievementFlags(), usedAchievements: true };
+        const pages = new Set(updated.pagesVisited || []);
+        pages.add('achievements');
+        updated.pagesVisited = [...pages];
+        localStorage.setItem('staxiq:achievements', JSON.stringify(updated));
+        setFlags(updated);
+    }, []);
+
+    const pagesVisited = new Set(flags.pagesVisited || []).size;
+
+    const userData = {
+        connected: !!connected,
+        strategyCount: flags.strategyCount || 0,
+        pagesVisited,
+        sbtcBalance: portfolio?.sbtcBalance || '0',
+        riskProfile: flags.riskProfile || '',
+        usedCalculator: !!flags.usedCalculator,
+        usedStacking: !!flags.usedStacking,
+        usedHealth: !!flags.usedHealth,
+        usedCompare: !!flags.usedCompare,
+        totalUSD: typeof portfolio?.totalUSD === 'number' ? portfolio.totalUSD : 0,
+        badgeCount: 0,
+    };
+
+    const earned = ALL_BADGES.filter((b) => b.condition({
         ...userData,
-        badgeCount: ALL_BADGES.filter(b2 => b2.condition(userData)).length,
+        badgeCount: ALL_BADGES.filter((b2) => b2.condition(userData)).length,
     }));
-    const locked = ALL_BADGES.filter(b => !b.condition({
+    const locked = ALL_BADGES.filter((b) => !b.condition({
         ...userData,
         badgeCount: earned.length,
     }));
@@ -137,107 +170,64 @@ export default function Achievements({ connected, address }) {
     return (
         <div className="max-w-5xl mx-auto space-y-6">
 
-            {/* Header */}
             <div className="flex items-start justify-between flex-wrap gap-4">
                 <div>
-                    <h1
-                        className="font-display font-bold text-3xl mb-1"
-                        style={{ color: s('text') }}
-                    >
+                    <h1 className="font-display font-bold text-3xl mb-1" style={{ color: s('text') }}>
                         Achievements
                     </h1>
                     <p style={{ color: s('muted'), fontSize: 14 }}>
                         Earn badges by exploring Staxiq and growing your Bitcoin DeFi portfolio.
                     </p>
                 </div>
-                <div
-                    className="rounded-xl px-3 py-1.5 text-center"
-                    style={{
-                        background: 'linear-gradient(135deg, #F7931A22, #F7931A11)',
-                        border: '1px solid #F7931A33',
-                    }}
-                >
-                    <p
-                        className="font-mono font-black text-xl"
-                        style={{ color: '#F7931A' }}
-                    >
+                <div className="rounded-xl px-3 py-1.5 text-center"
+                    style={{ background: 'linear-gradient(135deg, #F7931A22, #F7931A11)', border: '1px solid #F7931A33' }}>
+                    <p className="font-mono font-black text-xl" style={{ color: '#F7931A' }}>
                         {earned.length}/{ALL_BADGES.length}
                     </p>
-                    <p
-                        className="text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: '#F7931A' }}
-                    >
+                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#F7931A' }}>
                         Badges Earned
                     </p>
                 </div>
             </div>
 
-            {/* Progress bar */}
-            <div
-                className="rounded-2xl p-4"
-                style={{ background: s('bg'), border: `1px solid ${s('border')}` }}
-            >
+            <div className="rounded-2xl p-4" style={{ background: s('bg'), border: `1px solid ${s('border')}` }}>
                 <div className="flex justify-between mb-2">
-                    <span className="text-xs font-bold" style={{ color: s('muted') }}>
-                        Collection Progress
-                    </span>
+                    <span className="text-xs font-bold" style={{ color: s('muted') }}>Collection Progress</span>
                     <span className="text-xs font-mono font-bold" style={{ color: '#F7931A' }}>
                         {Math.round((earned.length / ALL_BADGES.length) * 100)}%
                     </span>
                 </div>
-                <div
-                    className="w-full h-2 rounded-full overflow-hidden"
-                    style={{ background: isDark ? '#141c2e' : '#f1f5ff' }}
-                >
-                    <div
-                        className="h-full rounded-full transition-all duration-700"
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: isDark ? '#141c2e' : '#f1f5ff' }}>
+                    <div className="h-full rounded-full transition-all duration-700"
                         style={{
                             width: `${(earned.length / ALL_BADGES.length) * 100}%`,
                             background: 'linear-gradient(90deg, #F7931A, #3B82F6)',
-                        }}
-                    />
+                        }} />
                 </div>
             </div>
 
-            {/* Earned badges */}
             {earned.length > 0 && (
                 <div>
-                    <h2
-                        className="font-black text-lg mb-4"
-                        style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
-                    >
+                    <h2 className="font-black text-lg mb-4"
+                        style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}>
                         Earned ({earned.length})
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {earned.map(badge => (
-                            <div
-                                key={badge.id}
-                                className="rounded-2xl p-4 text-center transition-all hover:scale-[1.02]"
+                        {earned.map((badge) => (
+                            <div key={badge.id} className="rounded-2xl p-4 text-center transition-all hover:scale-[1.02]"
                                 style={{
                                     background: `${badge.color}15`,
                                     border: `1px solid ${badge.color}44`,
                                     boxShadow: `0 4px 16px ${badge.color}22`,
-                                }}
-                            >
-                                <div
-                                    className="w-7 h-7 rounded-xl mx-auto mb-2 flex items-center justify-center text-base"
-                                    style={{
-                                        background: `${badge.color}22`,
-                                        border: `1px solid ${badge.color}44`,
-                                    }}
-                                >
+                                }}>
+                                <div className="w-7 h-7 rounded-xl mx-auto mb-2 flex items-center justify-center text-base"
+                                    style={{ background: `${badge.color}22`, border: `1px solid ${badge.color}44` }}>
                                     {badge.icon}
                                 </div>
-                                <p
-                                    className="font-display font-black text-sm mb-1"
-                                    style={{ color: badge.color }}
-                                >
+                                <p className="font-display font-black text-sm mb-1" style={{ color: badge.color }}>
                                     {badge.title}
                                 </p>
-                                <p
-                                    className="text-xs leading-snug"
-                                    style={{ color: s('muted') }}
-                                >
+                                <p className="text-xs leading-snug" style={{ color: s('muted') }}>
                                     {badge.description}
                                 </p>
                             </div>
@@ -246,45 +236,24 @@ export default function Achievements({ connected, address }) {
                 </div>
             )}
 
-            {/* Locked badges */}
             {locked.length > 0 && (
                 <div>
-                    <h2
-                        className="font-black text-lg mb-4"
-                        style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}
-                    >
+                    <h2 className="font-black text-lg mb-4"
+                        style={{ color: s('text'), fontFamily: "'Space Grotesk', sans-serif" }}>
                         Locked ({locked.length})
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {locked.map(badge => (
-                            <div
-                                key={badge.id}
-                                className="rounded-2xl p-4 text-center opacity-50"
-                                style={{
-                                    background: s('card'),
-                                    border: `1px solid ${s('border')}`,
-                                }}
-                            >
-                                <div
-                                    className="w-7 h-7 rounded-xl mx-auto mb-2 flex items-center justify-center text-base grayscale"
-                                    style={{
-                                        background: isDark ? '#1e2d4a' : '#f1f5ff',
-                                        border: `1px solid ${s('border')}`,
-                                        filter: 'grayscale(1)',
-                                    }}
-                                >
+                        {locked.map((badge) => (
+                            <div key={badge.id} className="rounded-2xl p-4 text-center opacity-50"
+                                style={{ background: s('card'), border: `1px solid ${s('border')}` }}>
+                                <div className="w-7 h-7 rounded-xl mx-auto mb-2 flex items-center justify-center text-base grayscale"
+                                    style={{ background: isDark ? '#1e2d4a' : '#f1f5ff', border: `1px solid ${s('border')}`, filter: 'grayscale(1)' }}>
                                     {badge.icon}
                                 </div>
-                                <p
-                                    className="font-display font-black text-sm mb-1"
-                                    style={{ color: s('muted') }}
-                                >
+                                <p className="font-display font-black text-sm mb-1" style={{ color: s('muted') }}>
                                     {badge.title}
                                 </p>
-                                <p
-                                    className="text-xs leading-snug"
-                                    style={{ color: s('dim') }}
-                                >
+                                <p className="text-xs leading-snug" style={{ color: s('dim') }}>
                                     {badge.description}
                                 </p>
                             </div>
@@ -294,4 +263,20 @@ export default function Achievements({ connected, address }) {
             )}
         </div>
     );
+}
+
+/**
+ * Call from any page to mark a feature as used in localStorage.
+ * @param {string} key  e.g. 'usedCalculator', 'usedStacking', 'usedHealth'
+ */
+export function trackAchievement(key) {
+    try {
+        const flags = JSON.parse(localStorage.getItem('staxiq:achievements') || '{}');
+        if (flags[key]) return; // already set
+        const pages = new Set(flags.pagesVisited || []);
+        pages.add(key);
+        flags.pagesVisited = [...pages];
+        flags[key] = true;
+        localStorage.setItem('staxiq:achievements', JSON.stringify(flags));
+    } catch { /* ignore storage errors */ }
 }

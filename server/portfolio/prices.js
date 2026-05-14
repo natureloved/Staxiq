@@ -30,7 +30,11 @@ const COINGECKO_BASE = process.env.COINGECKO_BASE ?? 'https://api.coingecko.com/
 const COINGECKO_IDS = {
   STX: 'blockstack',
   BTC: 'bitcoin',
+  USDC: 'usd-coin', // fetched to detect depegs; others default to $1
 };
+
+// Stablecoins outside this threshold trigger a depeg warning.
+const DEPEG_BAND = 0.02; // ±2 cents
 
 /**
  * @param {string} symbol
@@ -87,14 +91,24 @@ export async function getPrices(ctx, symbols) {
     return /** @type {Record<string, { usd?: number }>} */ ({});
   });
 
-  // 4. Map back to internal symbols.
+  // 4. Map back to internal symbols. For stablecoins with a CoinGecko ID
+  //    (currently USDC), override the $1.00 pin if a real price is available
+  //    and log a warning when it's outside the ±2 % depeg band.
   for (const s of symbols) {
-    if (out[s]) continue; // stablecoin already pinned
     const source = priceSourceFor(s);
     const id = COINGECKO_IDS[source];
     if (!id) continue;
     const usd = prices[id]?.usd;
-    if (typeof usd === 'number' && Number.isFinite(usd) && usd > 0) {
+    if (typeof usd !== 'number' || !Number.isFinite(usd) || usd <= 0) continue;
+
+    if (stables.has(s)) {
+      // Stablecoin depeg detection
+      const deviation = Math.abs(usd - 1.0);
+      if (deviation > DEPEG_BAND) {
+        ctx.log('prices: stablecoin depeg detected', { symbol: s, price: usd, deviation });
+      }
+      out[s] = usd.toFixed(8); // use real market price when available
+    } else {
       out[s] = usd.toFixed(8);
     }
   }

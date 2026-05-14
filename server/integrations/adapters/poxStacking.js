@@ -86,18 +86,71 @@ async function fetchYields(ctx) {
 }
 
 /**
+ * Compute the trailing APY by:
+ *   1. Fetching recent Bitcoin (burn) blocks from the Hiro burnchain API.
+ *   2. Summing `total_commit_spend` (satoshis miners paid into PoX) per block.
+ *   3. Extrapolating to a full reward cycle then annualising (26 cycles/year).
+ *   4. Dividing by the USD value of STX currently stacked.
+ *
+ * Falls back to '0.07' (7% indicative) on any network or data failure so
+ * the yield display is never blank.
+ *
  * @param {import('../types.js').AdapterContext} ctx
- * @returns {Promise<string>} APY as a decimal string
+ * @returns {Promise<string>} APY as a decimal string, e.g. '0.0812'
  */
 async function computeTrailingApy(ctx) {
   return ctx.cache.wrap('yields:pox-stacking:apy', TTL.YIELDS_MS, async () => {
-    // Real implementation: query the last N reward cycles, sum BTC paid out,
-    // divide by USD value of STX locked, annualise (cycles ≈ 26/year).
-    //
-    // Until we wire that to live data, surface a transparent placeholder
-    // marked clearly. Users will see "indicative" alongside the number in
-    // the UI; never let an unverified APY be presented as a precise figure.
-    return '0.07'; // placeholder, replace with real computation
+    try {
+      const base = apiBase(ctx);
+
+      const [poxRes, burnRes, priceRes] = await Promise.all([
+        ctx.fetch(`${base}/v2/pox`),
+        ctx.fetch(`${base}/extended/v1/burnchain/blocks?limit=100`),
+        ctx.fetch('https://api.coingecko.com/api/v3/simple/price?ids=blockstack,bitcoin&vs_currencies=usd'),
+      ]);
+
+      if (!poxRes.ok || !burnRes.ok || !priceRes.ok) return '0.07';
+
+      const [pox, burnData, prices] = await Promise.all([
+        poxRes.json(),
+        burnRes.json(),
+        priceRes.json(),
+      ]);
+
+      const stackedUstx = Number(pox.current_cycle?.stacked_ustx || 0);
+      const cycleLength = pox.reward_cycle_length || 2100;
+      const blocks = burnData.results || [];
+
+      if (stackedUstx <= 0 || blocks.length === 0) return '0.07';
+
+      const totalCommitSats = blocks.reduce(
+        (sum, b) => sum + (Number(b.total_commit_spend) || 0),
+        0,
+      );
+      if (totalCommitSats === 0) return '0.07';
+
+      // Extrapolate: average commit per block × full cycle length → BTC per cycle
+      const avgCommitPerBlock = totalCommitSats / blocks.length;
+      const btcPerCycle = (avgCommitPerBlock * cycleLength) / 1e8;
+
+      const btcPrice = prices?.bitcoin?.usd;
+      const stxPrice = prices?.blockstack?.usd;
+      if (!btcPrice || !stxPrice || btcPrice <= 0 || stxPrice <= 0) return '0.07';
+
+      const CYCLES_PER_YEAR = 26;
+      const stxStacked = stackedUstx / 1e6;
+      const annualUsd = btcPerCycle * CYCLES_PER_YEAR * btcPrice;
+      const stackedUsd = stxStacked * stxPrice;
+
+      const apy = annualUsd / stackedUsd;
+
+      // PoX APY is historically 4-18%; reject wild values and fall back
+      if (!Number.isFinite(apy) || apy < 0.02 || apy > 0.30) return '0.07';
+      return apy.toFixed(4);
+    } catch (e) {
+      ctx.log('pox: trailing apy computation failed', { err: String(e) });
+      return '0.07';
+    }
   });
 }
 

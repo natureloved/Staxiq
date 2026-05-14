@@ -7,3 +7,24 @@ settings/Mainnet.toml
 staxiq-contracts/settings/Testnet.toml
 staxiq-contracts/settings/Mainnet.toml
 .DS_Store
+
+# Build archives & staging directories
+*.tar.gz
+staxiq-v2/
+staxiq-v2*/
+
+# Debug / error artefacts
+anthropic-*.json
+
+# Wave migration guides (served their purpose)
+01-register-granite.md
+02-wire-server-js.md
+03-portfolio-enricher.md
+04-fix-asset-diversity-rule.md
+WAVE_1_PR_PLAN.md
+ECOSYSTEM_PLAYBOOK.md
+REPO_CLEANUP.md
+
+# Root-level duplicates of docs/
+HEALTH_SCORE.md
+METHODOLOGY.md
