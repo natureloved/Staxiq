@@ -62,7 +62,7 @@ export default function Onboarding({ onComplete }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
             style={{
                 backgroundColor: isDark
                     ? 'rgba(10,14,26,0.95)'
@@ -71,7 +71,7 @@ export default function Onboarding({ onComplete }) {
             }}
         >
             <div
-                className="relative w-full max-w-md rounded-2xl p-8"
+                className="relative w-full max-w-md rounded-2xl p-6 my-auto"
                 style={{
                     background: isDark
                         ? 'linear-gradient(135deg, #141c2e 0%, #0d1117 100%)'
@@ -94,7 +94,7 @@ export default function Onboarding({ onComplete }) {
                 </button>
 
                 {/* Step dots */}
-                <div className="flex items-center justify-center gap-2 mb-6">
+                <div className="flex items-center justify-center gap-2 mb-4">
                     {STEPS.map((_, i) => (
                         <div
                             key={i}
@@ -112,7 +112,7 @@ export default function Onboarding({ onComplete }) {
 
                 {/* Step card */}
                 <div
-                    className="rounded-2xl p-8 text-center"
+                    className="rounded-2xl p-6 text-center"
                     style={{
                         background: STEPS[step].gradient,
                         border: `1px solid ${STEPS[step].borderColor}`,
@@ -120,7 +120,7 @@ export default function Onboarding({ onComplete }) {
                 >
                     {/* Tag line */}
                     <p
-                        className="text-xs font-black uppercase tracking-widest mb-4"
+                        className="text-xs font-black uppercase tracking-widest mb-3"
                         style={{ color: isDark ? '#8899bb' : '#64748b' }}
                     >
                         {STEPS[step].tag}
@@ -128,7 +128,7 @@ export default function Onboarding({ onComplete }) {
 
                     {/* Icon — smaller, 48px */}
                     <div
-                        className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-2xl mb-5"
+                        className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-2xl mb-3"
                         style={{
                             background: STEPS[step].borderColor,
                             border: `1px solid ${STEPS[step].borderColor}`,
@@ -139,7 +139,7 @@ export default function Onboarding({ onComplete }) {
 
                     {/* Title */}
                     <h3
-                        className="font-bold text-xl mb-3 leading-tight"
+                        className="font-bold text-lg mb-2 leading-tight"
                         style={{ color: isDark ? '#f0f4ff' : '#0a0e1a' }}
                     >
                         {STEPS[step].title}
@@ -147,7 +147,7 @@ export default function Onboarding({ onComplete }) {
 
                     {/* Description */}
                     <p
-                        className="text-sm leading-relaxed mb-4"
+                        className="text-sm leading-relaxed mb-3"
                         style={{ color: isDark ? '#8899bb' : '#64748b' }}
                     >
                         {STEPS[step].description}
@@ -169,7 +169,7 @@ export default function Onboarding({ onComplete }) {
                 {/* CTA */}
                 <button
                     onClick={handleNext}
-                    className="w-full py-3 rounded-xl font-semibold text-white mt-6
+                    className="w-full py-2.5 rounded-xl font-semibold text-white mt-5
             transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         background: 'linear-gradient(135deg, #F7931A 0%, #e8820a 100%)',
@@ -181,7 +181,7 @@ export default function Onboarding({ onComplete }) {
 
                 {/* Counter */}
                 <p
-                    className="text-xs mt-4 text-center"
+                    className="text-xs mt-3 text-center"
                     style={{ color: isDark ? '#4a5a7a' : '#8899bb' }}
                 >
                     {step + 1} of {STEPS.length}
