@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { authenticate, showConnect, AppConfig, UserSession } from '@stacks/connect';
-import { StacksMainnet, StacksTestnet } from '@stacks/network';
+import { createNetwork } from '@stacks/network';
 import { useNetwork } from '../context/NetworkContext';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
 
 // Resolved once at module load — follows VITE_STACKS_NETWORK, falls back to mainnet
-export const stacksNetwork =
-    (import.meta.env.VITE_STACKS_NETWORK === 'testnet')
-        ? new StacksTestnet()
-        : new StacksMainnet();
+export const stacksNetwork = createNetwork(
+    import.meta.env.VITE_STACKS_NETWORK === 'testnet' ? 'testnet' : 'mainnet'
+);
 
 export function useWallet() {
     const { network } = useNetwork();
