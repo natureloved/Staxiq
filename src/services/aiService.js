@@ -35,16 +35,13 @@ export async function getAIStrategy({
             }),
         });
 
-        if (res.ok) {
-            const data = await res.json();
-            if (data.text) return data.text;
-        }
-
-        // Surface the backend's error message if available
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Backend returned ${res.status}`);
+        // Read the body once and branch on shape
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.text) return data.text;
+        throw new Error(data.error || `Backend returned ${res.status}`);
     } catch (backendErr) {
-        // If a direct key is configured fall back to browser call (dev only)
+        // Fall back to direct browser call only when a key is explicitly
+        // configured (local dev without a backend server running).
         const directKey = import.meta.env.VITE_CLAUDE_API_KEY;
         if (!directKey) throw backendErr;
 
