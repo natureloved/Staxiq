@@ -3,10 +3,10 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const NetworkContext = createContext();
 
 export function NetworkProvider({ children }) {
-    // Default to testnet as per user request
+    // Default to env var; fall back to mainnet so missing/typo never shows testnet
     const [network, setNetwork] = useState(() => {
         const saved = localStorage.getItem('staxiq_network');
-        return saved || 'testnet';
+        return saved || import.meta.env.VITE_STACKS_NETWORK || 'mainnet';
     });
 
     useEffect(() => {

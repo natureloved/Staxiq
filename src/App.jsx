@@ -17,6 +17,7 @@ import HealthScore from './pages/HealthScore';
 import CompareProtocols from './pages/CompareProtocols';
 import Achievements from './pages/Achievements';
 import AICopilotPage from './pages/AICopilotPage';
+import ResearchMode from './pages/ResearchMode';
 
 
 function AppContent() {
@@ -68,6 +69,9 @@ function AppContent() {
               connected={connected}
               address={address}
             />
+          } />
+          <Route path="/research" element={
+            <ResearchMode connected={connected} address={address} />
           } />
 
         </Routes>

@@ -303,7 +303,7 @@ export default function AICopilotPage({ connected, address }) {
                                         </div>
                                         {anchorTxId && (
                                             <a
-                                                href={`https://explorer.hiro.so/txid/${anchorTxId}?chain=testnet`}
+                                                href={`https://explorer.hiro.so/txid/${anchorTxId}?chain=${import.meta.env.VITE_STACKS_NETWORK ?? 'mainnet'}`}
                                                 target="_blank"
                                                 className="text-[10px] font-mono text-blue-500 hover:underline"
                                             >

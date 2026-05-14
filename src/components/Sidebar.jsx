@@ -254,7 +254,7 @@ export default function Sidebar({ connected, isDemoMode, collapsed, setCollapsed
                             lineHeight: 1.4,
                             opacity: 0.8,
                         }}>
-                            {isDemoMode ? 'Demo Mode' : (connected ? 'Stacks Testnet Alpha' : 'Connect wallet to start')}
+                            {isDemoMode ? 'Demo Mode' : (connected ? (import.meta.env.VITE_STACKS_NETWORK === 'testnet' ? 'Stacks Testnet' : 'Stacks Mainnet') : 'Connect wallet to start')}
                         </p>
                     )}
                 </div>

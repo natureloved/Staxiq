@@ -52,7 +52,7 @@ export default function Hero() {
                         className="w-1.5 h-1.5 rounded-full bg-green-400"
                         style={{ animation: 'pulse 2s infinite' }}
                     />
-                    Stacks L2 · Live on Testnet
+                    Stacks L2 · {import.meta.env.VITE_STACKS_NETWORK === 'testnet' ? 'Testnet' : 'Live on Mainnet'}
                 </div>
 
                 {/* Heading */}

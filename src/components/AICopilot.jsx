@@ -407,7 +407,7 @@ export default function AICopilot({ connected, address, stxBalance, sbtcBalance,
                                 ⛓️ Strategy anchored on Bitcoin via Stacks
                             </span>
                             <a
-                                href={`https://explorer.hiro.so/txid/${anchorTxId}?chain=testnet`}
+                                href={`https://explorer.hiro.so/txid/${anchorTxId}?chain=${import.meta.env.VITE_STACKS_NETWORK ?? 'mainnet'}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xs font-mono transition-colors"

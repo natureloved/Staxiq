@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
 import { authenticate, showConnect, AppConfig, UserSession } from '@stacks/connect';
+import { StacksMainnet, StacksTestnet } from '@stacks/network';
 import { useNetwork } from '../context/NetworkContext';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
+
+// Resolved once at module load — follows VITE_STACKS_NETWORK, falls back to mainnet
+export const stacksNetwork =
+    (import.meta.env.VITE_STACKS_NETWORK === 'testnet')
+        ? new StacksTestnet()
+        : new StacksMainnet();
 
 export function useWallet() {
     const { network } = useNetwork();
@@ -12,7 +19,8 @@ export function useWallet() {
     const [loading, setLoading] = useState(false);
 
     const getStxAddress = (userData) => {
-        return network === 'testnet'
+        // Read from env var — same source of truth as stacksNetwork above
+        return (import.meta.env.VITE_STACKS_NETWORK === 'testnet')
             ? userData?.profile?.stxAddress?.testnet
             : userData?.profile?.stxAddress?.mainnet;
     };

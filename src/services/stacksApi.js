@@ -66,7 +66,7 @@ export async function getTransactionHistory(address) {
             txId: tx.tx_id,
             explorerUrl: address.startsWith('ST')
                 ? `https://explorer.hiro.so/txid/${tx.tx_id}?chain=testnet`
-                : `https://explorer.hiro.so/txid/${tx.tx_id}`,
+                : `https://explorer.hiro.so/txid/${tx.tx_id}?chain=mainnet`,
             type: tx.tx_type,
             status: tx.tx_status,
             amount: tx.token_transfer?.amount

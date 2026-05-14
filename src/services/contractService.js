@@ -11,16 +11,16 @@ import {
     cvToJSON,
 } from '@stacks/blockchain-api-client';
 
-import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
+import { StacksMainnet, StacksTestnet } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
 
 const CONTRACT_ADDRESS = 'ST9ZZEP9M6VZ9YJA0P69H313CRPV0HQ1ZNPVS8NZ';
 const CONTRACT_NAME = 'staxiq-user-profile';
 
 function getNetwork() {
-    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? STACKS_TESTNET
-        : STACKS_MAINNET;
+    return (import.meta.env.VITE_STACKS_NETWORK === 'testnet')
+        ? new StacksTestnet()
+        : new StacksMainnet();
 }
 
 // ✅ Save risk profile on-chain (Wallet Popup)
