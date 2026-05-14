@@ -21,7 +21,7 @@ const STEPS = [
         cta: 'Understood',
     },
     {
-        tag: 'Powered by Gemini AI',
+        tag: 'Powered by Claude',
         title: 'Your personal Bitcoin DeFi advisor',
         description: `Tell Staxiq how much risk you're comfortable with. Our AI analyses your actual wallet balance and builds a plain-English strategy — which protocols to use, how much to put where, and exactly what to do first.`,
         note: 'Every strategy is permanently recorded on the Bitcoin blockchain via Stacks.',
