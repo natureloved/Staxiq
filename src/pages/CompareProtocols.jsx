@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useProtocolData } from '../hooks/useProtocolData';
+import { Link, useNavigate } from 'react-router-dom';
 
 const RISK_COLORS = {
     Low: { color: '#22c55e', bg: '#22c55e22', border: '#22c55e44' },
@@ -201,85 +202,85 @@ export default function CompareProtocols() {
                         {sorted.map((p, i) => {
                             const risk = RISK_COLORS[p.risk] ?? RISK_COLORS.Medium;
                             return (
-                                <div
-                                    key={p.id}
-                                    className="grid items-center px-5 py-4 transition-colors duration-150 cursor-pointer"
-                                    style={{
-                                        gridTemplateColumns: '2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
-                                        background: i % 2 === 0 ? s('row') : s('rowAlt'),
-                                        borderBottom: i < sorted.length - 1
-                                            ? `1px solid ${s('border')}` : 'none',
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.background = s('hover')}
-                                    onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? s('row') : s('rowAlt')}
-                                    onClick={() => window.open(p.url, '_blank')}
-                                >
-                                    {/* Name + logo */}
-                                    <div className="flex items-center gap-3">
-                                        <ProtocolLogo logo={p.logo} name={p.name} color={p.color} />
+                                <Link key={p.id} to={`/protocols/${p.id}`} className="contents">
+                                    <div
+                                        className="grid items-center px-5 py-4 transition-colors duration-150 cursor-pointer"
+                                        style={{
+                                            gridTemplateColumns: '2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
+                                            background: i % 2 === 0 ? s('row') : s('rowAlt'),
+                                            borderBottom: i < sorted.length - 1
+                                                ? `1px solid ${s('border')}` : 'none',
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = s('hover')}
+                                        onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? s('row') : s('rowAlt')}
+                                    >
+                                        {/* Name + logo */}
+                                        <div className="flex items-center gap-3">
+                                            <ProtocolLogo logo={p.logo} name={p.name} color={p.color} />
+                                            <span
+                                                className="font-bold text-sm font-creative"
+                                                style={{ color: s('text') }}
+                                            >
+                                                {p.name}
+                                                <span style={{ color: s('dim'), fontWeight: 400 }}> ↗</span>
+                                            </span>
+                                        </div>
+
+                                        {/* APY */}
+                                        <span className="font-mono font-black text-sm" style={{ color: '#F7931A' }}>
+                                            {loading && p.apy == null
+                                                ? <span style={{ color: s('dim') }}>…</span>
+                                                : p.apyDisplay ?? '—'
+                                            }
+                                            {p.apySource === 'fallback' && p.apy && (
+                                                <span
+                                                    title="Sourced from protocol's published rate"
+                                                    style={{ fontSize: 9, color: s('dim'), marginLeft: 4 }}
+                                                >
+                                                    ~
+                                                </span>
+                                            )}
+                                        </span>
+
+                                        {/* TVL */}
+                                        <span className="font-mono text-sm font-semibold" style={{ color: s('muted') }}>
+                                            {loading && !p.tvlRaw
+                                                ? <span style={{ color: s('dim') }}>…</span>
+                                                : p.tvl ?? '—'
+                                            }
+                                        </span>
+
+                                        {/* Risk badge */}
                                         <span
-                                            className="font-bold text-sm font-creative"
-                                            style={{ color: s('text') }}
-                                        >
-                                            {p.name}
-                                            <span style={{ color: s('dim'), fontWeight: 400 }}> ↗</span>
+                                            className="text-xs font-bold px-2 py-1 rounded-full w-fit"
+                                            style={{
+                                                background: risk.bg,
+                                                color: risk.color,
+                                                border: `1px solid ${risk.border}`,
+                                            }}
+                                        >{p.risk}</span>
+
+                                        {/* Type */}
+                                        <span className="text-xs font-semibold" style={{ color: s('muted') }}>
+                                            {p.type}
+                                        </span>
+
+                                        {/* Asset */}
+                                        <span className="font-mono text-xs font-bold" style={{ color: '#3B82F6' }}>
+                                            {p.asset}
+                                        </span>
+
+                                        {/* Audited */}
+                                        <span style={{ color: p.audited ? '#22c55e' : '#ef4444', fontSize: 16 }}>
+                                            {p.audited ? '✓' : '✗'}
+                                        </span>
+
+                                        {/* Min deposit */}
+                                        <span className="text-xs font-mono" style={{ color: s('dim') }}>
+                                            {p.minDeposit}
                                         </span>
                                     </div>
-
-                                    {/* APY */}
-                                    <span className="font-mono font-black text-sm" style={{ color: '#F7931A' }}>
-                                        {loading && p.apy == null
-                                            ? <span style={{ color: s('dim') }}>…</span>
-                                            : p.apyDisplay ?? '—'
-                                        }
-                                        {p.apySource === 'fallback' && p.apy && (
-                                            <span
-                                                title="Sourced from protocol's published rate"
-                                                style={{ fontSize: 9, color: s('dim'), marginLeft: 4 }}
-                                            >
-                                                ~
-                                            </span>
-                                        )}
-                                    </span>
-
-                                    {/* TVL */}
-                                    <span className="font-mono text-sm font-semibold" style={{ color: s('muted') }}>
-                                        {loading && !p.tvlRaw
-                                            ? <span style={{ color: s('dim') }}>…</span>
-                                            : p.tvl ?? '—'
-                                        }
-                                    </span>
-
-                                    {/* Risk badge */}
-                                    <span
-                                        className="text-xs font-bold px-2 py-1 rounded-full w-fit"
-                                        style={{
-                                            background: risk.bg,
-                                            color: risk.color,
-                                            border: `1px solid ${risk.border}`,
-                                        }}
-                                    >{p.risk}</span>
-
-                                    {/* Type */}
-                                    <span className="text-xs font-semibold" style={{ color: s('muted') }}>
-                                        {p.type}
-                                    </span>
-
-                                    {/* Asset */}
-                                    <span className="font-mono text-xs font-bold" style={{ color: '#3B82F6' }}>
-                                        {p.asset}
-                                    </span>
-
-                                    {/* Audited */}
-                                    <span style={{ color: p.audited ? '#22c55e' : '#ef4444', fontSize: 16 }}>
-                                        {p.audited ? '✓' : '✗'}
-                                    </span>
-
-                                    {/* Min deposit */}
-                                    <span className="text-xs font-mono" style={{ color: s('dim') }}>
-                                        {p.minDeposit}
-                                    </span>
-                                </div>
+                                </Link>
                             );
                         })}
                     </div>

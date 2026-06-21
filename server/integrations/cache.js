@@ -1,9 +1,9 @@
 /**
  * @fileoverview TTL cache for adapter responses.
  *
- * Two-tier strategy:
+ * Three-tier strategy:
  *   - In-memory (Map) for hot reads inside a single Node process.
- *   - Redis adapter (optional, env-gated) for shared cache across instances.
+ *   - Upstash Redis (optional, env-gated) for shared cache across instances.
  *
  * Adapters never call this directly with raw protocol responses — they wrap
  * their fetch in `cache.wrap(key, ttlMs, fn)`. This keeps the cache key
@@ -14,6 +14,8 @@
  *   tvl:<protocolSlug>
  *   positions:<protocolSlug>:<address>
  *   defillama:<protocolSlug>
+ *
+ * Enable Redis by setting UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.
  */
 
 /**
@@ -24,40 +26,101 @@
  */
 
 /**
- * Build an in-memory cache. Suitable for single-instance deployments and
- * for local dev. For production, pair this with a Redis-backed cache layered
- * in front (or swap the implementation behind the same interface).
+ * Build a two-tier cache: L1 in-memory + L2 Upstash Redis (optional).
+ * If Redis env vars are not set, falls back to in-memory only.
  *
+ * @param {import('./types.js').AdapterContext} [ctx] Optional context with fetch
  * @returns {Cache}
  */
-export function createMemoryCache() {
+export function createMemoryCache(ctx) {
   /** @type {Map<string, { value: unknown, expiresAt: number }>} */
-  const store = new Map();
+  const l1 = new Map();
 
   /** @type {Map<string, Promise<unknown>>} in-flight de-duplication */
   const inflight = new Map();
 
+  // Optional L2 Redis via Upstash
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const hasRedis = Boolean(upstashUrl && upstashToken);
+  const redisFetch = ctx?.fetch || ((url, init) => fetch(url, init));
+
+  async function redisGet(key) {
+    if (!hasRedis) return null;
+    try {
+      const res = await redisFetch(`${upstashUrl}/get/${encodeURIComponent(key)}`, {
+        headers: { Authorization: `Bearer ${upstashToken}` },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.result ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function redisSet(key, value, ttlMs) {
+    if (!hasRedis) return;
+    try {
+      const ttlSec = Math.ceil(ttlMs / 1000);
+      await redisFetch(`${upstashUrl}/set/${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${upstashToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ value: JSON.stringify(value), ex: ttlSec }),
+      });
+    } catch {
+      // non-fatal — L1 still serves
+    }
+  }
+
+  async function redisDel(key) {
+    if (!hasRedis) return;
+    try {
+      await redisFetch(`${upstashUrl}/del/${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${upstashToken}` },
+      });
+    } catch {
+      // non-fatal
+    }
+  }
+
   return {
     async wrap(key, ttlMs, fn) {
       const now = Date.now();
-      const hit = store.get(key);
-      if (hit && hit.expiresAt > now) {
-        // @ts-expect-error generic erased
-        return hit.value;
+
+      // L1 check
+      const l1Hit = l1.get(key);
+      if (l1Hit && l1Hit.expiresAt > now) {
+        return l1Hit.value;
       }
 
-      // Coalesce concurrent fetches for the same key — a thundering herd of
-      // parallel requests during a cold cache should not stampede the RPC.
+      // L2 check (Redis)
+      const redisRaw = await redisGet(key);
+      if (redisRaw !== null) {
+        try {
+          const value = JSON.parse(redisRaw);
+          l1.set(key, { value, expiresAt: now + ttlMs });
+          return value;
+        } catch {
+          // corrupted cache entry — fall through to fetch
+        }
+      }
+
+      // Thundering herd dedup — coalesce concurrent fetches for same key
       const existing = inflight.get(key);
       if (existing) {
-        // @ts-expect-error generic erased
         return existing;
       }
 
       const promise = (async () => {
         try {
           const value = await fn();
-          store.set(key, { value, expiresAt: Date.now() + ttlMs });
+          l1.set(key, { value, expiresAt: now + ttlMs });
+          await redisSet(key, value, ttlMs);
           return value;
         } finally {
           inflight.delete(key);
@@ -69,12 +132,16 @@ export function createMemoryCache() {
     },
 
     async invalidate(key) {
-      store.delete(key);
+      l1.delete(key);
+      await redisDel(key);
     },
 
     async invalidatePrefix(prefix) {
-      for (const key of store.keys()) {
-        if (key.startsWith(prefix)) store.delete(key);
+      for (const key of [...l1.keys()]) {
+        if (key.startsWith(prefix)) {
+          l1.delete(key);
+          await redisDel(key);
+        }
       }
     },
   };

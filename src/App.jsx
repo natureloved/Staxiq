@@ -4,6 +4,7 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { DemoProvider, useDemo } from './context/DemoContext';
 import { NetworkProvider } from './context/NetworkContext';
 import { useWallet } from './hooks/useWallet';
+import ErrorBoundary from './components/ErrorBoundary';
 import Onboarding from './components/Onboarding';
 import Navbar from './components/Navbar';
 import DashboardLayout from './components/DashboardLayout';
@@ -18,6 +19,7 @@ import CompareProtocols from './pages/CompareProtocols';
 import Achievements from './pages/Achievements';
 import AICopilotPage from './pages/AICopilotPage';
 import ResearchMode from './pages/ResearchMode';
+import ProtocolDetail from './pages/ProtocolDetail';
 
 
 function AppContent() {
@@ -73,6 +75,7 @@ function AppContent() {
           <Route path="/research" element={
             <ResearchMode connected={connected} address={address} />
           } />
+          <Route path="/protocols/:slug" element={<ProtocolDetail />} />
 
         </Routes>
       </DashboardLayout>
@@ -84,15 +87,17 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <NetworkProvider>
-          <DemoProvider>
-            <Onboarding onComplete={() => { }} />
-            <AppContent />
-          </DemoProvider>
-        </NetworkProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ThemeProvider>
+          <NetworkProvider>
+            <DemoProvider>
+              <Onboarding onComplete={() => { }} />
+              <AppContent />
+            </DemoProvider>
+          </NetworkProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

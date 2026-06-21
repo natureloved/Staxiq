@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .env
+.env.*
 .env.local
 settings/Testnet.toml
 settings/Mainnet.toml
@@ -28,3 +29,12 @@ REPO_CLEANUP.md
 # Root-level duplicates of docs/
 HEALTH_SCORE.md
 METHODOLOGY.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db

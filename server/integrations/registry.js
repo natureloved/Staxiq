@@ -12,26 +12,23 @@
 
 import { zestAdapter } from './adapters/zest.js';
 import { poxStackingAdapter } from './adapters/poxStacking.js';
-
-// As you implement these, uncomment + register. Stubbed so route handlers
-// don't crash with "no adapters" during early development.
 import { graniteAdapter } from './adapters/granite.js';
-// import { stackingDaoAdapter } from './adapters/stackingDao.js';
-// import { bitflowAdapter } from './adapters/bitflow.js';
-// import { alexAdapter } from './adapters/alex.js';
-// import { hermeticaAdapter } from './adapters/hermetica.js';
-// import { velarAdapter } from './adapters/velar.js';
+import { stackingDaoAdapter } from './adapters/stackingDao.js';
+import { bitflowAdapter } from './adapters/bitflow.js';
+import { alexAdapter } from './adapters/alex.js';
+import { hermeticaAdapter } from './adapters/hermetica.js';
+import { velarAdapter } from './adapters/velar.js';
 
 /** @type {import('./types.js').ProtocolAdapter[]} */
 const ADAPTERS = [
   zestAdapter,
   poxStackingAdapter,
   graniteAdapter,
-  // stackingDaoAdapter,
-  // bitflowAdapter,
-  // alexAdapter,
-  // hermeticaAdapter,
-  // velarAdapter,
+  stackingDaoAdapter,
+  bitflowAdapter,
+  alexAdapter,
+  hermeticaAdapter,
+  velarAdapter,
 ];
 
 /**

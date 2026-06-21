@@ -4,6 +4,21 @@
 
 const HIRO_API = 'https://api.hiro.so';
 
+// Token decimal places map — defaults to 6 (micro-units per unit)
+// sBTC is SIP-010 on Stacks with 8 decimals; others are typically 6
+const TOKEN_DECIMALS = {
+  'SP...sbtc-token': 8,
+  'SP...ststx-token': 6,
+};
+
+// Helper: get decimals for a given token contract address
+function getDecimals(tokenContract) {
+  if (TOKEN_DECIMALS[tokenContract]) return TOKEN_DECIMALS[tokenContract];
+  const [, contractId] = tokenContract.split('.');
+  if (contractId && contractId.includes('sbtc')) return 8;
+  return 6;
+}
+
 // Known Stacks protocol contract addresses and their LP/receipt tokens
 const PROTOCOL_CONTRACTS = [
     {
@@ -127,6 +142,8 @@ export async function detectWalletProtocols(address) {
     for (const protocol of PROTOCOL_CONTRACTS) {
         const [contractAddr] = protocol.tokenContract.split('.');
         const tokenKey = protocol.tokenContract;
+        const decimals = getDecimals(tokenKey);
+        const divisor = 10 ** decimals;
 
         // Check 1: wallet holds the protocol's receipt/LP token
         const tokenBalance = tokenBalances[tokenKey]?.balance ?? '0';
@@ -141,7 +158,8 @@ export async function detectWalletProtocols(address) {
             detected.push({
                 ...protocol,
                 balance: tokenBalance,
-                balanceNum: Number(BigInt(tokenBalance)) / 1_000_000, // microunits → units
+                balanceNum: Number(BigInt(tokenBalance)) / divisor,
+                decimals,
                 hasToken,
                 hasInteracted,
                 // Confidence: holding token = confirmed, tx only = likely
