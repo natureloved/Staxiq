@@ -71,6 +71,7 @@ const ProtocolCard = () => {
                     href={protocol.url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     className="w-full flex items-center justify-center py-2.5 rounded-lg text-xs font-bold transition-all duration-300 hover:scale-[1.02]"
                     style={{
                         background: 'linear-gradient(135deg, #F7931A, #e8820a)',
