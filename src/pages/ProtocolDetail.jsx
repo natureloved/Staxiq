@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3002';
+
 const RISK_COLORS = {
   low: { color: '#22c55e', bg: '#22c55e18', border: '#22c55e44' },
   medium: { color: '#f59e0b', bg: '#f59e0b18', border: '#f59e0b44' },
@@ -29,7 +31,7 @@ export default function ProtocolDetail() {
     setLoading(true);
     setError(null);
     setData(null);
-    fetch(`/api/protocols/${encodeURIComponent(slug)}`)
+    fetch(`${API_BASE}/api/protocols/${encodeURIComponent(slug)}`)
       .then((r) => {
         if (!r.ok) throw new Error(`Protocol not found (${r.status})`);
         return r.json();

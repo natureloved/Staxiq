@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { HealthScoreCard } from '../components/HealthScoreCard.jsx';
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3002';
+
 /**
  * Research Mode: Top-of-funnel page. No wallet connection. Anyone can paste
  * a Stacks address and see the same view a connected user gets.
@@ -26,7 +28,7 @@ export default function ResearchMode({ connected, address: connectedAddress }) {
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/research/${address.trim()}`);
+      const res = await fetch(`${API_BASE}/api/research/${address.trim()}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'lookup failed');
       setData(json);
