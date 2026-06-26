@@ -67,11 +67,7 @@ const ProtocolCard = () => {
             </div>
 
             <div className="mt-auto relative z-10">
-                <a
-                    href={protocol.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
+                            <span
                     className="w-full flex items-center justify-center py-2.5 rounded-lg text-xs font-bold transition-all duration-300 hover:scale-[1.02]"
                     style={{
                         background: 'linear-gradient(135deg, #F7931A, #e8820a)',
@@ -83,7 +79,7 @@ const ProtocolCard = () => {
                     <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
-                </a>
+                </span>
             </div>
         </div>
     );
@@ -147,9 +143,15 @@ const ProtocolCard = () => {
                     protocols
                         .filter(protocol => filter === 'All' || protocol.type === filter)
                         .map((protocol) => (
-                            <Link key={protocol.id} to={`/protocols/${protocol.id}`} className="block group">
-                                {cardFor(protocol)}
-                            </Link>
+                        <a
+                            key={protocol.id}
+                            href={protocol.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block group"
+                        >
+                            {cardFor(protocol)}
+                        </a>
                         ))
                 )}
             </div>

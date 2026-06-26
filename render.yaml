@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: staxiq-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: STACKS_NETWORK
+        value: mainnet
+      - key: CORS_ORIGINS
+        value: https://staxiq.vercel.app
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: RATE_LIMIT_MAX
+        value: 100

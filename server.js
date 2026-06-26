@@ -6,6 +6,7 @@ import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { createMemoryCache } from './server/integrations/cache.js';
 import { mountReadOnlyRoutes } from './server/routes/readonly.js';
+import { mountStackingRoutes } from './server/routes/stacking.js';
 import { mountCopilotRoutes } from './server/routes/copilot.js';
 
 dotenv.config();
@@ -82,9 +83,11 @@ const adapterCtx = {
 };
 
 mountReadOnlyRoutes(app, adapterCtx);
+mountStackingRoutes(app, adapterCtx);
 mountCopilotRoutes(app, adapterCtx);
 
 const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  logger.info(`Staxiq proxy server running on http://localhost:${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  logger.info(`Staxiq proxy server running on http://${HOST}:${PORT}`);
 });
