@@ -119,6 +119,30 @@ export async function getSTXPrice() {
     return 2.85;
 }
 
+/**
+ * BTC/USD price with the same fallback chain as getSTXPrice.
+ * Used to express stacking rewards in BTC terms.
+ */
+export async function getBTCPrice() {
+    try {
+        const res = await fetch('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.USD) return data.USD;
+        }
+    } catch (e) { }
+
+    try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+        if (res.ok) {
+            const data = await res.json();
+            if (data?.bitcoin?.usd) return data.bitcoin.usd;
+        }
+    } catch (err) { }
+
+    return 68000; // last-resort hard default
+}
+
 export async function getFullPortfolio(address) {
     // Parallelize everything, but handle transaction history separately if needed
     // to ensure totalUSD is calculated ASAP

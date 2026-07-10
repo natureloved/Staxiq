@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { DemoProvider, useDemo } from './context/DemoContext';
@@ -11,15 +11,25 @@ import DashboardLayout from './components/DashboardLayout';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
 
-import Overview from './pages/Dashboard';
-import YieldCalculator from './pages/YieldCalculator';
-import StackingTracker from './pages/StackingTracker';
-import HealthScore from './pages/HealthScore';
-import CompareProtocols from './pages/CompareProtocols';
-import Achievements from './pages/Achievements';
-import AICopilotPage from './pages/AICopilotPage';
-import ResearchMode from './pages/ResearchMode';
-import ProtocolDetail from './pages/ProtocolDetail';
+// Route-level code splitting — each page loads on demand instead of shipping
+// one monolithic bundle on first visit.
+const Overview = lazy(() => import('./pages/Dashboard'));
+const YieldCalculator = lazy(() => import('./pages/YieldCalculator'));
+const StackingTracker = lazy(() => import('./pages/StackingTracker'));
+const HealthScore = lazy(() => import('./pages/HealthScore'));
+const CompareProtocols = lazy(() => import('./pages/CompareProtocols'));
+const Achievements = lazy(() => import('./pages/Achievements'));
+const AICopilotPage = lazy(() => import('./pages/AICopilotPage'));
+const ResearchMode = lazy(() => import('./pages/ResearchMode'));
+const ProtocolDetail = lazy(() => import('./pages/ProtocolDetail'));
+
+function RouteFallback() {
+  return (
+    <div className="max-w-5xl mx-auto py-16 text-center">
+      <div className="animate-pulse text-sm opacity-60">Loading…</div>
+    </div>
+  );
+}
 
 
 function AppContent() {
@@ -47,6 +57,7 @@ function AppContent() {
       {(!connected && !isDemoMode) && <Hero />}
 
       <DashboardLayout connected={connected} isDemoMode={isDemoMode}>
+        <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={
             <Overview connected={connected} address={address} />
@@ -78,6 +89,7 @@ function AppContent() {
           <Route path="/protocols/:slug" element={<ProtocolDetail />} />
 
         </Routes>
+        </Suspense>
       </DashboardLayout>
 
       <Footer />

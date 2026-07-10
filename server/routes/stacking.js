@@ -33,13 +33,29 @@ export function mountStackingRoutes(app, ctx) {
       const totalStacked = allPositions.reduce((sum, p) => sum + parseFloat(p.principal.amount || '0'), 0);
       const networkApy = poxYields?.[0]?.apyTotal || '0.07';
 
+      // /v2/pox reports the cycle as current_cycle.id; cycle length is the sum
+      // of the reward and prepare phases (no reward_cycle_length field exists).
+      const cycleLength =
+        (poxData.reward_phase_block_length || 2000) + (poxData.prepare_phase_block_length || 100);
+      const blocksUntilNextCycle = poxData.next_cycle?.blocks_until_reward_phase ?? null;
+      const cycleProgress = blocksUntilNextCycle != null
+        ? Math.min(100, Math.max(0, Math.round(((cycleLength - blocksUntilNextCycle) / cycleLength) * 100)))
+        : null;
+      // Burnchain blocks arrive roughly every 10 minutes
+      const nextCycleAt = blocksUntilNextCycle != null
+        ? new Date(Date.now() + blocksUntilNextCycle * 10 * 60 * 1000).toISOString()
+        : null;
+
       res.json({
         address,
         positions: allPositions,
         totalStackedSTX: totalStacked,
         networkApy,
-        currentCycle: poxData.current_cycle?.cycle_number || null,
-        rewardCycleLength: poxData.reward_cycle_length || 2100,
+        currentCycle: poxData.current_cycle?.id ?? null,
+        rewardCycleLength: cycleLength,
+        cycleProgress,
+        blocksUntilNextCycle,
+        nextCycleAt,
         timestamp: new Date().toISOString(),
       });
     } catch (e) {

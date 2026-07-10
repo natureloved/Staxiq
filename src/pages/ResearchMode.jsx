@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { HealthScoreCard } from '../components/HealthScoreCard.jsx';
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3002';
+import { API_BASE, assertApiConfigured } from '../services/apiConfig';
 
 /**
  * Research Mode: Top-of-funnel page. No wallet connection. Anyone can paste
@@ -28,6 +27,7 @@ export default function ResearchMode({ connected, address: connectedAddress }) {
     }
     setLoading(true);
     try {
+      assertApiConfigured();
       const res = await fetch(`${API_BASE}/api/research/${address.trim()}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'lookup failed');

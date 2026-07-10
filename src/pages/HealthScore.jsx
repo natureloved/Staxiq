@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useDemo } from '../context/DemoContext';
 import { DEMO_HEALTH } from '../data/demoData';
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3002';
+import { API_BASE, API_CONFIGURED } from '../services/apiConfig';
 
 // Human-readable fix suggestions keyed on rubric rule id
 const RULE_FIXES = {
@@ -113,7 +112,7 @@ export default function HealthScore({ connected, address }) {
   const [loadingHealth, setLoadingHealth] = useState(false);
 
   const fetchBackendHealth = useCallback(async () => {
-    if (!address || isDemoMode) return;
+    if (!address || isDemoMode || !API_CONFIGURED) return;
     setLoadingHealth(true);
     try {
       const res = await fetch(`${API_BASE}/api/research/${address}`);

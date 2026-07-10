@@ -64,6 +64,17 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// The copilot route calls the Anthropic API (real token cost per request), so
+// it gets its own much tighter limit on top of the general one.
+const copilotLimiter = rateLimit({
+  windowMs: parseInt(process.env.COPILOT_RATE_LIMIT_WINDOW_MS || '60000', 10),
+  max: parseInt(process.env.COPILOT_RATE_LIMIT_MAX || '5', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'AI request limit reached — try again in a minute.' },
+});
+app.use('/api/copilot', copilotLimiter);
+
 // ── Address input sanitization ──────────────────────────────────────────────
 app.use('/api/research/:address', (req, _res, next) => {
   const raw = String(req.params.address || '').trim();
@@ -78,9 +89,9 @@ app.use('/api/research/:address', (req, _res, next) => {
 const adapterCtx = {
   network: process.env.STACKS_NETWORK === 'testnet' ? 'testnet' : 'mainnet',
   fetch: (url, init) => fetch(url, init),
-  cache: createMemoryCache(adapterCtx),
   log: (msg, meta) => logger.info({ msg, ...meta }),
 };
+adapterCtx.cache = createMemoryCache(adapterCtx);
 
 mountReadOnlyRoutes(app, adapterCtx);
 mountStackingRoutes(app, adapterCtx);

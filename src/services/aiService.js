@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3002';
+import { API_BASE, assertApiConfigured } from './apiConfig';
 
 /**
  * Request an AI strategy via the backend proxy.
@@ -20,6 +20,7 @@ export async function getAIStrategy({
 }) {
     // Prefer backend proxy (API key stays server-side)
     try {
+        assertApiConfigured();
         const res = await fetch(`${API_BASE}/api/copilot`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -40,9 +41,11 @@ export async function getAIStrategy({
         if (res.ok && data.text) return data.text;
         throw new Error(data.error || `Backend returned ${res.status}`);
     } catch (backendErr) {
-        // Fall back to direct browser call only when a key is explicitly
-        // configured (local dev without a backend server running).
-        const directKey = import.meta.env.VITE_CLAUDE_API_KEY;
+        // Fall back to direct browser call only in local dev with a key
+        // explicitly configured. Never in production — a Vite env var is
+        // compiled into the public bundle, which would ship the key to
+        // every visitor.
+        const directKey = import.meta.env.DEV ? import.meta.env.VITE_CLAUDE_API_KEY : undefined;
         if (!directKey) throw backendErr;
 
         return callAnthropicDirect({

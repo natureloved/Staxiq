@@ -1,65 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { usePortfolio } from '../hooks/usePortfolio';
 import { useDemo } from '../context/DemoContext';
 import { DEMO_STACKING } from '../data/demoData';
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3002';
+import { API_BASE, assertApiConfigured } from '../services/apiConfig';
+import { getSTXPrice, getBTCPrice } from '../services/stacksApi';
 
 const CYCLE_DAYS = 14;
 
+// Fallback only — used when the backend didn't return a real nextCycleAt.
 function nextCycleDate() {
     const n = new Date();
     n.setDate(n.getDate() + CYCLE_DAYS);
     return n.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function stableProgress() {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const dayOfYear = Math.floor((now - start) / 86400000);
-    return Math.min(95, Math.max(5, 30 + (dayOfYear % 60)));
-}
-
-function generateEarnings(staked, apy, cycles, currentCycle) {
+// Projected per-cycle rewards over recent cycles, clearly labeled as
+// estimates. Real per-cycle payout history isn't available yet, so these are
+// flat projections from the current network APY — no fabricated variance.
+function estimateEarnings(staked, apy, cycles, currentCycle, btcPerSTX) {
+    if (staked <= 0 || currentCycle <= 0) return [];
     const perCycle = staked * apy / 26;
-    const btcPerSTX = 0.00007;
     return Array.from({ length: cycles }, (_, i) => {
-        const variance = 1 - (i * 0.04);
-        const earned = perCycle * Math.max(variance, 0.5);
-        const btcVal = earned * btcPerSTX;
+        const cyclesAgo = i + 1;
         const d = new Date();
-        d.setDate(d.getDate() - CYCLE_DAYS * (i + 1));
+        d.setDate(d.getDate() - CYCLE_DAYS * cyclesAgo);
         return {
-            cycle: currentCycle - (cycles - i),
-            stxEarned: parseFloat(earned.toFixed(2)),
-            btcValue: parseFloat(btcVal.toFixed(6)),
+            cycle: currentCycle - cyclesAgo,
+            stxEarned: parseFloat(perCycle.toFixed(2)),
+            btcValue: parseFloat((perCycle * btcPerSTX).toFixed(6)),
             date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            status: 'Paid',
+            status: 'Estimated',
         };
     });
 }
 
-function computeLive(stackingData, stxPrice) {
+function computeLive(stackingData, stxPrice, btcPrice) {
     const staked = stackingData?.totalStackedSTX || 0;
     const apy = stackingData?.networkApy ? parseFloat(stackingData.networkApy) : 0.07;
-    const currentCycle = stackingData?.currentCycle || 4;
-    const cyclesEst = Math.min(Math.max(currentCycle, 1), 5);
+    const currentCycle = stackingData?.currentCycle || 0;
+    const cyclesEst = Math.min(Math.max(currentCycle, 0), 5);
 
     const perCycleSTX = staked * apy / 26;
-    const btcPerSTX = (stxPrice || 0.26) / 68000;
+    const btcPerSTX = stxPrice > 0 && btcPrice > 0 ? stxPrice / btcPrice : 0;
     const btcPerCycle = perCycleSTX * btcPerSTX;
+
+    const nextPayoutDate = stackingData?.nextCycleAt
+        ? new Date(stackingData.nextCycleAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : nextCycleDate();
 
     return {
         stackedSTX: staked,
         totalSTXEarned: parseFloat((perCycleSTX * cyclesEst).toFixed(2)),
         totalBTCEarned: parseFloat((btcPerCycle * cyclesEst).toFixed(6)),
-        cyclesCompleted: cyclesEst,
         currentCycle: currentCycle,
-        cycleProgress: stableProgress(),
+        // Real on-chain progress from the backend (/v2/pox); null when unknown
+        cycleProgress: stackingData?.cycleProgress ?? null,
         nextPayoutSTX: parseFloat(perCycleSTX.toFixed(4)),
-        nextPayoutDate: nextCycleDate(),
-        earnings: generateEarnings(staked, apy, cyclesEst, currentCycle),
+        nextPayoutDate,
+        earnings: estimateEarnings(staked, apy, cyclesEst, currentCycle, btcPerSTX),
         positions: stackingData?.positions || [],
         apiError: false,
     };
@@ -68,68 +66,60 @@ function computeLive(stackingData, stxPrice) {
 export default function StackingTracker({ connected, address }) {
     const { isDark } = useTheme();
     const { isDemoMode } = useDemo();
-    const { portfolio: livePortfolio } = usePortfolio(isDemoMode ? null : address);
-    const stxBalance = livePortfolio.stxBalance;
 
     const [stackingData, setStackingData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [stxPrice, setStxPrice] = useState(0.26);
+    const [stxPrice, setStxPrice] = useState(0);
+    const [btcPrice, setBtcPrice] = useState(0);
+
+    const fetchStacking = useCallback(async (signal) => {
+        setLoading(true);
+        setError('');
+        try {
+            assertApiConfigured();
+            const res = await fetch(
+                `${API_BASE}/api/stacking/${encodeURIComponent(address)}`,
+                { signal }
+            );
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            setStackingData(data);
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                setError(err.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [address]);
 
     useEffect(() => {
         if (!connected || !address || isDemoMode) return;
-
         const controller = new AbortController();
-
-        async function fetchStacking() {
-            setLoading(true);
-            setError('');
-            try {
-                const res = await fetch(
-                    `${API_BASE}/api/stacking/${encodeURIComponent(address)}`,
-                    { signal: controller.signal }
-                );
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.error || `HTTP ${res.status}`);
-                }
-                const data = await res.json();
-                setStackingData(data);
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    setError(err.message);
-                }
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchStacking();
-
+        fetchStacking(controller.signal);
         return () => controller.abort();
-    }, [connected, address, isDemoMode]);
+    }, [connected, address, isDemoMode, fetchStacking]);
 
     useEffect(() => {
         let cancelled = false;
-        async function fetchPrice() {
-            try {
-                const res = await fetch(
-                    'https://api.coingecko.com/api/v3/simple/price?ids=blockstack&vs_currencies=usd'
-                );
-                if (!res.ok) return;
-                const data = await res.json();
-                if (!cancelled && data?.blockstack?.usd) {
-                    setStxPrice(data.blockstack.usd);
-                }
-            } catch { /* silently fail */ }
+        async function fetchPrices() {
+            const [stx, btc] = await Promise.all([getSTXPrice(), getBTCPrice()]);
+            if (!cancelled) {
+                setStxPrice(stx);
+                setBtcPrice(btc);
+            }
         }
-        fetchPrice();
+        fetchPrices();
         return () => { cancelled = true; };
     }, []);
 
     const d = isDemoMode
         ? DEMO_STACKING
-        : computeLive(stackingData, stxPrice);
+        : computeLive(stackingData, stxPrice, btcPrice);
 
     const noData = !isDemoMode && !stackingData && !loading && error;
     const showEmpty = !isDemoMode && noData;
@@ -145,9 +135,9 @@ export default function StackingTracker({ connected, address }) {
 
     const stats = [
         { label: 'Stacked STX', value: d.stackedSTX.toLocaleString(), unit: 'STX', color: '#F7931A', icon: '' },
-        { label: 'Total STX Earned', value: d.totalSTXEarned, unit: 'STX', color: '#22c55e', icon: '' },
-        { label: 'Total BTC Earned', value: d.totalBTCEarned, unit: 'BTC', color: '#F7931A', icon: '' },
-        { label: 'Cycles Completed', value: d.cyclesCompleted, unit: 'cycles', color: '#3B82F6', icon: '' },
+        { label: 'Est. STX Earned', value: d.totalSTXEarned, unit: 'STX', color: '#22c55e', icon: '' },
+        { label: 'Est. BTC Earned', value: d.totalBTCEarned, unit: 'BTC', color: '#F7931A', icon: '' },
+        { label: 'Current Cycle', value: d.currentCycle ? `#${d.currentCycle}` : '—', unit: 'PoX cycle', color: '#3B82F6', icon: '' },
     ];
 
     if (!connected && !isDemoMode) {
@@ -192,17 +182,7 @@ export default function StackingTracker({ connected, address }) {
                         {error || 'Make sure the backend is reachable and your address has stacked STX.'}
                     </p>
                     <button
-                        onClick={() => {
-                            setError('');
-                            const controller = new AbortController();
-                            fetch(
-                                `${API_BASE}/api/stacking/${encodeURIComponent(address)}`,
-                                { signal: controller.signal }
-                            )
-                                .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(new Error(e.error || r.status))))
-                                .then(setStackingData)
-                                .catch(e => setError(e.message));
-                        }}
+                        onClick={() => fetchStacking()}
                         className="px-6 py-2 rounded-xl font-bold text-white text-sm"
                         style={{ background: '#F7931A' }}
                     >
@@ -246,7 +226,7 @@ export default function StackingTracker({ connected, address }) {
                     Stacking Tracker
                 </h1>
                 <p style={{ color: s('muted'), fontSize: 14 }}>
-                    Live STX stacking rewards via StackingDAO · Bitcoin-secured yields
+                    Your live STX stacking position · reward figures are estimates from current network APY
                 </p>
             </div>
 
@@ -257,7 +237,7 @@ export default function StackingTracker({ connected, address }) {
             )}
 
             {/* Positions breakdown */}
-            {d.positions.length > 0 && (
+            {(d.positions?.length ?? 0) > 0 && (
                 <div
                     className="rounded-2xl p-5"
                     style={{ background: s('bg'), border: `1px solid ${s('border')}` }}
@@ -329,29 +309,37 @@ export default function StackingTracker({ connected, address }) {
                         Current Cycle Progress
                     </h2>
 
-                    <div
-                        className="w-full h-3 rounded-full mb-3 overflow-hidden"
-                        style={{ background: isDark ? '#141c2e' : '#f1f5ff' }}
-                    >
-                        <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{
-                                width: `${d.cycleProgress}%`,
-                                background: 'linear-gradient(90deg, #F7931A, #3B82F6)',
-                            }}
-                        />
-                    </div>
+                    {d.cycleProgress != null ? (
+                        <>
+                            <div
+                                className="w-full h-3 rounded-full mb-3 overflow-hidden"
+                                style={{ background: isDark ? '#141c2e' : '#f1f5ff' }}
+                            >
+                                <div
+                                    className="h-full rounded-full transition-all duration-700"
+                                    style={{
+                                        width: `${d.cycleProgress}%`,
+                                        background: 'linear-gradient(90deg, #F7931A, #3B82F6)',
+                                    }}
+                                />
+                            </div>
 
-                    <div className="flex justify-between mb-6">
-                        <span className="text-sm font-semibold"
-                              style={{ color: s('muted') }}>
-                            {d.cycleProgress}% complete
-                        </span>
-                        <span className="text-sm font-semibold"
-                              style={{ color: s('dim') }}>
-                            Cycle #{d.currentCycle}
-                        </span>
-                    </div>
+                            <div className="flex justify-between mb-6">
+                                <span className="text-sm font-semibold"
+                                      style={{ color: s('muted') }}>
+                                    {d.cycleProgress}% complete
+                                </span>
+                                <span className="text-sm font-semibold"
+                                      style={{ color: s('dim') }}>
+                                    Cycle #{d.currentCycle}
+                                </span>
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-sm mb-6" style={{ color: s('muted') }}>
+                            Cycle progress unavailable right now.
+                        </p>
+                    )}
 
                     {d.nextPayoutSTX > 0 && (
                         <div
@@ -373,7 +361,7 @@ export default function StackingTracker({ connected, address }) {
                                 </p>
                                 <p className="text-xs mt-0.5"
                                    style={{ color: s('dim') }}>
-                                    ≈ ${(d.nextPayoutSTX * stxPrice).toFixed(2)} USD · {d.nextPayoutDate}
+                                    {stxPrice > 0 && `≈ $${(d.nextPayoutSTX * stxPrice).toFixed(2)} USD · `}{d.nextPayoutDate}
                                 </p>
                             </div>
                         </div>
@@ -388,6 +376,10 @@ export default function StackingTracker({ connected, address }) {
                     <h2 className="font-bold text-lg mb-4"
                         style={{ color: s('text') }}>
                         Earnings Breakdown
+                        <span className="text-xs font-semibold uppercase tracking-widest ml-2"
+                              style={{ color: s('dim') }}>
+                            {isDemoMode ? 'Demo' : 'Estimated'}
+                        </span>
                     </h2>
 
                     {d.earnings.length > 0 ? (

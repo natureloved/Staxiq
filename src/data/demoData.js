@@ -9,6 +9,13 @@ export const DEMO_WALLET = {
     txCount: 47,
 };
 
+// Demo dates are generated relative to "now" so the demo never looks stale.
+const demoDate = (daysFromNow) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysFromNow);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
 export const DEMO_STACKING = {
     stackedSTX: 2000,
     totalSTXEarned: 187.4,
@@ -18,13 +25,21 @@ export const DEMO_STACKING = {
     cycleProgress: 68,
     nextPayoutDays: 6,
     nextPayoutSTX: 18.2,
-    nextPayoutDate: 'Mar 14, 2026',
+    nextPayoutDate: demoDate(6),
+    positions: [
+        {
+            protocolSlug: 'stackingdao',
+            kind: 'Liquid stacking (stSTX)',
+            principal: { amount: '2000', symbol: 'STX' },
+            apyTotal: '0.095',
+        },
+    ],
     earnings: [
-        { cycle: 14, stxEarned: 18.7, btcValue: 0.000198, date: 'Feb 25, 2026', status: 'Paid' },
-        { cycle: 13, stxEarned: 17.9, btcValue: 0.000187, date: 'Feb 04, 2026', status: 'Paid' },
-        { cycle: 12, stxEarned: 19.2, btcValue: 0.000201, date: 'Jan 14, 2026', status: 'Paid' },
-        { cycle: 11, stxEarned: 16.8, btcValue: 0.000175, date: 'Dec 24, 2025', status: 'Paid' },
-        { cycle: 10, stxEarned: 18.1, btcValue: 0.000190, date: 'Dec 03, 2025', status: 'Paid' },
+        { cycle: 14, stxEarned: 18.7, btcValue: 0.000198, date: demoDate(-8), status: 'Paid' },
+        { cycle: 13, stxEarned: 17.9, btcValue: 0.000187, date: demoDate(-22), status: 'Paid' },
+        { cycle: 12, stxEarned: 19.2, btcValue: 0.000201, date: demoDate(-36), status: 'Paid' },
+        { cycle: 11, stxEarned: 16.8, btcValue: 0.000175, date: demoDate(-50), status: 'Paid' },
+        { cycle: 10, stxEarned: 18.1, btcValue: 0.000190, date: demoDate(-64), status: 'Paid' },
     ],
 };
 

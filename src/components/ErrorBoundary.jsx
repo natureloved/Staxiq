@@ -12,6 +12,9 @@ export class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     this.setState({ errorInfo });
+    // Always log — without this, production crashes vanish silently behind
+    // the fallback UI. Swap for an error-reporting service when one is added.
+    console.error('ErrorBoundary caught:', error, errorInfo?.componentStack);
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
